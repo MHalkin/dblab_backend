@@ -14,6 +14,18 @@ const Chapter = require('./Chapter.js');
 const Skill = require('./Skill.js');
 const SkillChapter = require('./SkillChapter.js');
 const DisciplineSkill = require('./DisciplineSkill.js');
+
+const LinkType = require('./LinkType.js');
+const Resource = require('./Resource.js');
+const Stack = require('./Stack.js');
+const InteractionUserResource = require('./InteractionUserResource.js');
+const InteractionUserStack = require('./InteractionUserStack.js');
+const Comment = require('./Comment.js');
+const ResourceStack = require('./ResourceStack.js');
+const ResourceDevelopmentDirection = require('./ResourceDevelopmentDirection.js');
+const Rating = require('./Rating.js');
+const RatingResource = require('./RatingResource.js');
+
 const Direction = require('./Direction.js');
 const ProposalType = require('./ProposalType.js');
 const Proposal = require('./Proposal.js');
@@ -249,37 +261,37 @@ Competition.hasMany(Result, { foreignKey: 'competition_Id' });
 Result.belongsTo(Competition, { foreignKey: 'competition_Id' });
 
 module.exports = {
-    User,
-    Teacher,
-    Language,
-    Discipline,
-    DisciplineTeacher,
-    Lesson,
-    Event,
-    Material,
-    DevelopmentDirection,
-    Level,
-    Chapter,
-    Skill,
-    SkillChapter,
-    DisciplineSkill,
-    LinkType,
-    Resource,
-    Stack,
-    InteractionUserResource,
-    InteractionUserStack,
-    Comment,
-    ResourceStack,
-    ResourceDevelopmentDirection,
-    Rating,
-    RatingResource,
-    Direction,
-    ProposalType,
-    Proposal,
-    Work,
-    ResultType,
-    Magazine,
-    Conference,
-    Competition,
-    Result
+  User,
+  Teacher,
+  Language,
+  Discipline,
+  DisciplineTeacher,
+  Lesson,
+  Event,
+  Material,
+  DevelopmentDirection,
+  Level,
+  Chapter,
+  Skill,
+  SkillChapter,
+  DisciplineSkill,
+  LinkType,
+  Resource,
+  Stack,
+  InteractionUserResource,
+  InteractionUserStack,
+  Comment,
+  ResourceStack,
+  ResourceDevelopmentDirection,
+  Rating,
+  RatingResource,
+  Direction,
+  ProposalType,
+  Proposal,
+  Work,
+  ResultType,
+  Magazine,
+  Conference,
+  Competition,
+  Result
 };
