@@ -118,3 +118,94 @@ CREATE TABLE disciplineSkill (
     FOREIGN KEY (skill_Id) REFERENCES skill(skill_Id),
     FOREIGN KEY (level_Id) REFERENCES level(level_Id)
 );
+
+CREATE TABLE direction (
+    direction_Id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255),
+    description VARCHAR(500)
+);
+
+CREATE TABLE proposal_type (
+    proposal_type_Id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255)
+);
+
+CREATE TABLE proposal (
+    proposal_Id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255),
+    description VARCHAR(500),
+    status VARCHAR(100),
+    complexity VARCHAR(100),
+    teacher_Id INT,
+    proposal_type_Id INT,
+    direction_Id INT,
+    FOREIGN KEY (teacher_Id) REFERENCES teacher(teacher_Id),
+    FOREIGN KEY (proposal_type_Id) REFERENCES proposal_type(proposal_type_Id),
+    FOREIGN KEY (direction_Id) REFERENCES direction(direction_Id)
+);
+
+CREATE TABLE work (
+    work_Id INT PRIMARY KEY AUTO_INCREMENT,
+    begining_date DATE,
+    review VARCHAR(500),
+    comment VARCHAR(500),
+    name VARCHAR(255),
+    file VARCHAR(255),
+    proposal_Id INT,
+    user_Id INT,
+    FOREIGN KEY (proposal_Id) REFERENCES proposal(proposal_Id),
+    FOREIGN KEY (user_Id) REFERENCES user(user_Id)
+);
+
+CREATE TABLE result_type (
+    result_type_Id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255)
+);
+
+CREATE TABLE magazine (
+    magazine_Id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255),
+    publisher VARCHAR(255),
+    city VARCHAR(255),
+    release_frequency VARCHAR(100),
+    link VARCHAR(255)
+);
+
+CREATE TABLE conference (
+    conference_Id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255),
+    approximate_date DATE,
+    host VARCHAR(255),
+    city VARCHAR(255),
+    link VARCHAR(255),
+    online BOOLEAN,
+    offline BOOLEAN
+);
+
+CREATE TABLE competition (
+    competition_Id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255),
+    approximate_date DATE,
+    host VARCHAR(255),
+    link VARCHAR(255),
+    conference_Id INT,
+    FOREIGN KEY (conference_Id) REFERENCES conference(conference_Id)
+);
+
+CREATE TABLE result (
+    result_Id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255),
+    year INT,
+    pages INT,
+    full_name VARCHAR(255),
+    work_Id INT,
+    result_type_Id INT,
+    magazine_Id INT,
+    conference_Id INT,
+    competition_Id INT,
+    FOREIGN KEY (work_Id) REFERENCES work(work_Id),
+    FOREIGN KEY (result_type_Id) REFERENCES result_type(result_type_Id),
+    FOREIGN KEY (magazine_Id) REFERENCES magazine(magazine_Id),
+    FOREIGN KEY (conference_Id) REFERENCES conference(conference_Id),
+    FOREIGN KEY (competition_Id) REFERENCES competition(competition_Id)
+);

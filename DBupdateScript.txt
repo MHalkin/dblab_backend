@@ -10,3 +10,7 @@ ALTER TABLE `development_direction`
 MODIFY COLUMN `development_direction_Description` VARCHAR(500) NULL;
 ALTER TABLE `teacher` 
 MODIFY COLUMN `text` VARCHAR(500) NULL;
+
+-- Додавання поля student_group для зберігання групи студента
+ALTER TABLE `user` 
+ADD COLUMN `student_group` VARCHAR(50) NULL;
