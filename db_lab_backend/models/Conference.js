@@ -1,41 +1,44 @@
 const { DataTypes } = require('sequelize');
 const db = require('../config/db.config.js');
 
-const User = db.sequelize.define('User', {
-    user_Id: {
+const Conference = db.sequelize.define('Conference', {
+    conference_Id: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true
     },
-    nickname: {
+    name: {
         type: DataTypes.STRING(255),
         allowNull: true
     },
-    email: {
-        type: DataTypes.STRING(255),
-        unique: true,
-        allowNull: false
-    },
-    login: {
-        type: DataTypes.STRING(255),
-        unique: true,
-        allowNull: false
-    },
-    password: {
-        type: DataTypes.STRING(255),
-        allowNull: false
-    },
-    role: {
-        type: DataTypes.STRING(50),
+    approximate_date: {
+        type: DataTypes.DATE,
         allowNull: true
     },
-    student_group: {
-        type: DataTypes.STRING(50),
+    host: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    city: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    link: {
+        type: DataTypes.STRING(255),
+        allowNull: true
+    },
+    online: {
+        type: DataTypes.BOOLEAN,
+        allowNull: true
+    },
+    offline: {
+        type: DataTypes.BOOLEAN,
         allowNull: true
     },
 }, {
-    tableName: 'user',
+    tableName: 'conference',
     timestamps: false
 });
 
-module.exports = User;
+module.exports = Conference;
+

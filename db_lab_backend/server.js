@@ -23,6 +23,18 @@ const userRoutes = require('./routes/user.js');
 const authRoutes = require('./routes/auth.js');
 const cacheRoutes = require('./routes/cache.js');
 
+const directionRoutes = require('./routes/direction.js');
+const proposalTypeRoutes = require('./routes/proposalType.js');
+const proposalRoutes = require('./routes/proposal.js');
+const workRoutes = require('./routes/work.js');
+const resultTypeRoutes = require('./routes/resultType.js');
+const magazineRoutes = require('./routes/magazine.js');
+const conferenceRoutes = require('./routes/conference.js');
+const competitionRoutes = require('./routes/competition.js');
+const resultRoutes = require('./routes/result.js');
+const statisticsRoutes = require('./routes/statistics.js');
+const reportRoutes = require('./routes/report.js');
+
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
@@ -42,6 +54,18 @@ app.use('/teacher', teacherRoutes);
 app.use('/user', userRoutes);
 app.use('/auth', authRoutes);
 app.use('/cache', cacheRoutes);
+
+app.use('/direction', directionRoutes);
+app.use('/proposalType', proposalTypeRoutes);
+app.use('/proposal', proposalRoutes);
+app.use('/work', workRoutes);
+app.use('/resultType', resultTypeRoutes);
+app.use('/magazine', magazineRoutes);
+app.use('/conference', conferenceRoutes);
+app.use('/competition', competitionRoutes);
+app.use('/result', resultRoutes);
+app.use('/statistics', statisticsRoutes);
+app.use('/report', reportRoutes);
 
 db.sequelize.sync()
     .then(() => {

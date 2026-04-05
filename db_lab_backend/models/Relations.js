@@ -14,6 +14,15 @@ const Chapter = require('./Chapter.js');
 const Skill = require('./Skill.js');
 const SkillChapter = require('./SkillChapter.js');
 const DisciplineSkill = require('./DisciplineSkill.js');
+const Direction = require('./Direction.js');
+const ProposalType = require('./ProposalType.js');
+const Proposal = require('./Proposal.js');
+const Work = require('./Work.js');
+const ResultType = require('./ResultType.js');
+const Magazine = require('./Magazine.js');
+const Conference = require('./Conference.js');
+const Competition = require('./Competition.js');
+const Result = require('./Result.js');
 
 User.hasOne(Teacher, { foreignKey: 'user_Id' });
 Teacher.belongsTo(User, { foreignKey: 'user_Id' });
@@ -66,6 +75,49 @@ Skill.belongsToMany(Discipline, { through: DisciplineSkill, foreignKey: 'skill_I
 Level.hasMany(DisciplineSkill, { foreignKey: 'level_Id' });
 DisciplineSkill.belongsTo(Level, { foreignKey: 'level_Id' });
 
+// ProposalType relations
+ProposalType.hasMany(Proposal, { foreignKey: 'proposal_type_Id' });
+Proposal.belongsTo(ProposalType, { foreignKey: 'proposal_type_Id' });
+
+// Direction relations
+Direction.hasMany(Proposal, { foreignKey: 'direction_Id' });
+Proposal.belongsTo(Direction, { foreignKey: 'direction_Id' });
+
+// Teacher relations
+Teacher.hasMany(Proposal, { foreignKey: 'teacher_Id' });
+Proposal.belongsTo(Teacher, { foreignKey: 'teacher_Id' });
+
+// Proposal relations
+Proposal.hasMany(Work, { foreignKey: 'proposal_Id' });
+Work.belongsTo(Proposal, { foreignKey: 'proposal_Id' });
+
+// User relations
+User.hasMany(Work, { foreignKey: 'user_Id' });
+Work.belongsTo(User, { foreignKey: 'user_Id' });
+
+// Work relations
+Work.hasMany(Result, { foreignKey: 'work_Id' });
+Result.belongsTo(Work, { foreignKey: 'work_Id' });
+
+// ResultType relations
+ResultType.hasMany(Result, { foreignKey: 'result_type_Id' });
+Result.belongsTo(ResultType, { foreignKey: 'result_type_Id' });
+
+// Magazine relations
+Magazine.hasMany(Result, { foreignKey: 'magazine_Id' });
+Result.belongsTo(Magazine, { foreignKey: 'magazine_Id' });
+
+// Conference relations
+Conference.hasMany(Result, { foreignKey: 'conference_Id' });
+Result.belongsTo(Conference, { foreignKey: 'conference_Id' });
+
+Conference.hasMany(Competition, { foreignKey: 'conference_Id' });
+Competition.belongsTo(Conference, { foreignKey: 'conference_Id' });
+
+// Competition relations
+Competition.hasMany(Result, { foreignKey: 'competition_Id' });
+Result.belongsTo(Competition, { foreignKey: 'competition_Id' });
+
 module.exports = {
     User,
     Teacher,
@@ -80,5 +132,14 @@ module.exports = {
     Chapter,
     Skill,
     SkillChapter,
-    DisciplineSkill
+    DisciplineSkill,
+    Direction,
+    ProposalType,
+    Proposal,
+    Work,
+    ResultType,
+    Magazine,
+    Conference,
+    Competition,
+    Result
 };
