@@ -75,6 +75,136 @@ Skill.belongsToMany(Discipline, { through: DisciplineSkill, foreignKey: 'skill_I
 Level.hasMany(DisciplineSkill, { foreignKey: 'level_Id' });
 DisciplineSkill.belongsTo(Level, { foreignKey: 'level_Id' });
 
+User.hasMany(Resource, { foreignKey: 'author_user_Id' });
+Resource.belongsTo(User, {
+  foreignKey: {
+    name: 'author_user_Id',
+    allowNull: true,
+  },
+  onDelete: 'SET NULL',
+  onUpdate: 'CASCADE',
+});
+
+User.hasMany(Stack, { foreignKey: 'author_user_Id' });
+Stack.belongsTo(User, {
+  foreignKey: {
+    name: 'author_user_Id',
+    allowNull: true,
+  },
+  onDelete: 'SET NULL',
+  onUpdate: 'CASCADE',
+});
+
+LinkType.hasMany(Resource, { foreignKey: 'link_type_Id' });
+Resource.belongsTo(LinkType, {
+  foreignKey: {
+    name: 'link_type_Id',
+    allowNull: true,
+  },
+  onDelete: 'SET NULL',
+  onUpdate: 'CASCADE',
+});
+
+User.hasMany(InteractionUserResource, { foreignKey: 'user_Id' });
+InteractionUserResource.belongsTo(User, {
+  foreignKey: {
+    name: 'user_Id',
+    allowNull: true,
+  },
+  onDelete: 'SET NULL',
+  onUpdate: 'CASCADE',
+});
+
+Resource.hasMany(InteractionUserResource, { foreignKey: 'resource_Id' });
+InteractionUserResource.belongsTo(Resource, {
+  foreignKey: {
+    name: 'resource_Id',
+    allowNull: false,
+  },
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+
+User.hasMany(InteractionUserStack, { foreignKey: 'user_Id' });
+InteractionUserStack.belongsTo(User, {
+  foreignKey: {
+    name: 'user_Id',
+    allowNull: true,
+  },
+  onDelete: 'SET NULL',
+  onUpdate: 'CASCADE',
+});
+
+Stack.hasMany(InteractionUserStack, { foreignKey: 'stack_Id' });
+InteractionUserStack.belongsTo(Stack, {
+  foreignKey: {
+    name: 'stack_Id',
+    allowNull: false,
+  },
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+
+InteractionUserResource.hasMany(Comment, { foreignKey: 'interaction_user_resource_Id' });
+Comment.belongsTo(InteractionUserResource, {
+  foreignKey: {
+    name: 'interaction_user_resource_Id',
+    allowNull: true,
+  },
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+
+InteractionUserStack.hasMany(Comment, { foreignKey: 'interaction_user_stack_Id' });
+Comment.belongsTo(InteractionUserStack, {
+  foreignKey: {
+    name: 'interaction_user_stack_Id',
+    allowNull: true,
+  },
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+
+Resource.belongsToMany(Stack, {
+  through: ResourceStack,
+  foreignKey: 'resource_Id',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+Stack.belongsToMany(Resource, {
+  through: ResourceStack,
+  foreignKey: 'stack_Id',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+
+Resource.belongsToMany(DevelopmentDirection, {
+  through: ResourceDevelopmentDirection,
+  foreignKey: 'resource_Id',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+DevelopmentDirection.belongsToMany(Resource, {
+  through: ResourceDevelopmentDirection,
+  foreignKey: 'development_direction_Id',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+
+Rating.belongsToMany(Resource, {
+  through: RatingResource,
+  foreignKey: 'rating_Id',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+Resource.belongsToMany(Rating, {
+  through: RatingResource,
+  foreignKey: 'resource_Id',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+});
+
+
 // ProposalType relations
 ProposalType.hasMany(Proposal, { foreignKey: 'proposal_type_Id' });
 Proposal.belongsTo(ProposalType, { foreignKey: 'proposal_type_Id' });
@@ -133,6 +263,16 @@ module.exports = {
     Skill,
     SkillChapter,
     DisciplineSkill,
+    LinkType,
+    Resource,
+    Stack,
+    InteractionUserResource,
+    InteractionUserStack,
+    Comment,
+    ResourceStack,
+    ResourceDevelopmentDirection,
+    Rating,
+    RatingResource,
     Direction,
     ProposalType,
     Proposal,
