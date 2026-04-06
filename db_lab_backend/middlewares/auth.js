@@ -13,16 +13,16 @@ const isStudent = async (req, res, next) => {
             return res.status(401).json({ message: 'No authorization header' });
         }
 
-        const token = authHeader.split(' ')[1]; 
+        const token = authHeader.split(' ')[1];
 
         if (!token) {
             return res.status(401).json({ message: 'No token provided' });
         }
 
         const decoded = jwt.verify(token, process.env.KEY);
-        
+
         // Зберігаємо user_Id в запиті для подальшого використання
-        req.user = decoded; 
+        req.user = decoded;
 
         const user = await User.findByPk(decoded.id);
         if (!user) {
@@ -31,7 +31,7 @@ const isStudent = async (req, res, next) => {
         next();
     } catch (error) {
         console.error("Auth Error:", error.message);
-        return res.status(401).json({message: "Invalid token"});
+        return res.status(401).json({ message: "Invalid token" });
     }
 };
 
@@ -41,7 +41,7 @@ const isAdmin = async (req, res, next) => {
     }
     try {
         const authHeader = req.headers['authorization'];
-        
+
         if (!authHeader) {
             return res.status(401).json({ message: 'No authorization header' });
         }
@@ -54,11 +54,11 @@ const isAdmin = async (req, res, next) => {
 
         const decoded = jwt.verify(token, process.env.KEY);
         const user = await User.findByPk(decoded.id);
-        
+
         if (!user) {
             return res.status(401).json({ message: 'User not found' });
         }
-        
+
         if (decoded.role === "admin") {
             next();
         } else {
@@ -66,19 +66,19 @@ const isAdmin = async (req, res, next) => {
         }
     } catch (error) {
         console.error("Auth Admin Error:", error.message);
-        return res.status(401).json({message: "Invalid token"});
+        return res.status(401).json({ message: "Invalid token" });
     }
 };
 
 const getUser = async (req, res, next) => {
     try {
-        const token = req.headers['authorization'];
+        const token = req.headers['authorization'].split(' ')[1];
         const decoded = jwt.verify(token, process.env.KEY);
         const user = await User.findByPk(decoded.id);
         req.user = user;
         next();
     } catch (error) {
-        return res.status(500).json({message: error.message});
+        return res.status(500).json({ message: error.message });
     }
 }
 
