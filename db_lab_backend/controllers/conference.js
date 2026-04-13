@@ -1,6 +1,3 @@
-const path = require('path');
-const fs = require('fs');
-const cache = path.join(__dirname, '..', 'cache.json');
 const Conference = require('../models/Relations').Conference;
 
 const create = async (req, res) => {
@@ -24,11 +21,13 @@ const create = async (req, res) => {
 
 const getAll = async (req, res) => {
     try {
-        const cacheData = JSON.parse(fs.readFileSync(cache, 'utf-8'));
-        if (!cacheData.conferences) {
-            return res.status(404).json({ message: 'conference not found in cache.' });
+        const conferences = await Conference.findAll();
+
+        if (!conferences || conferences.length === 0) {
+            return res.status(404).json({ message: 'conference not found.' });
         }
-        return res.status(200).json(cacheData.conferences);
+
+        return res.status(200).json(conferences);
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
@@ -75,7 +74,7 @@ const update = async (req, res) => {
             online: online === "true" || online === true,
             offline: offline === "true" || offline === true
         };
-        const conference = await Conference.update(conferenceData, {where: {conference_Id}});
+        const conference = await Conference.update(conferenceData, { where: { conference_Id } });
         return res.status(200).json(conference);
     } catch (error) {
         return res.status(500).json({ message: error.message });

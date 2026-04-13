@@ -4,7 +4,8 @@ CREATE TABLE user (
     email VARCHAR(255) UNIQUE,
     login VARCHAR(255) UNIQUE,
     password VARCHAR(255),
-    role VARCHAR(50)
+    role VARCHAR(50),
+    student_group VARCHAR(50) DEFAULT NULL 
 );
 
 CREATE TABLE teacher (
@@ -13,10 +14,10 @@ CREATE TABLE teacher (
     full_name VARCHAR(255),
     place_of_Employment VARCHAR(255),
     position VARCHAR(255),
-    text VARCHAR(500),
+    text VARCHAR(500) DEFAULT NULL,
     level VARCHAR(100),
     teacher_role VARCHAR(255),
-    photo MEDIUMBLOB,
+    photo MEDIUMBLOB DEFAULT NULL,
     FOREIGN KEY (user_Id) REFERENCES user(user_Id)
 );
 
@@ -28,7 +29,7 @@ CREATE TABLE language (
 CREATE TABLE discipline (
     discipline_Id INT PRIMARY KEY AUTO_INCREMENT,
     discipline_name VARCHAR(255),
-    discipline_Description VARCHAR(500),
+    discipline_Description VARCHAR(500) DEFAULT NULL, 
     discipline_type VARCHAR(255),
     volume INT,
     syllabus_link VARCHAR(255)
@@ -60,7 +61,7 @@ CREATE TABLE event (
     event_name VARCHAR(255),
     type VARCHAR(100),
     format VARCHAR(100),
-    begin_date TIME,
+    begin_date TIME, 
     status VARCHAR(50),
     FOREIGN KEY (teacher_Id) REFERENCES teacher(teacher_Id),
     FOREIGN KEY (lesson_Id) REFERENCES lesson(lesson_Id)
@@ -70,7 +71,7 @@ CREATE TABLE material (
     material_Id INT PRIMARY KEY AUTO_INCREMENT,
     event_Id INT,
     material_name VARCHAR(255),
-    file VARCHAR(255),
+    file VARCHAR(255) DEFAULT NULL,
     material_type VARCHAR(100),
     FOREIGN KEY (event_Id) REFERENCES event(event_Id)
 );
@@ -78,7 +79,7 @@ CREATE TABLE material (
 CREATE TABLE development_direction (
     development_direction_Id INT PRIMARY KEY AUTO_INCREMENT,
     development_direction_name VARCHAR(255),
-    development_direction_Description VARCHAR(500)
+    development_direction_Description VARCHAR(500) DEFAULT NULL
 );
 
 CREATE TABLE level (
@@ -147,9 +148,11 @@ CREATE TABLE proposal (
 CREATE TABLE work (
     work_Id INT PRIMARY KEY AUTO_INCREMENT,
     begining_date DATE,
+    changes_date DATE DEFAULT (CURRENT_DATE),
     review VARCHAR(500),
     comment VARCHAR(500),
     name VARCHAR(255),
+    status ENUM('В обробці', 'Активна', 'Завершена', 'Відхилена') NOT NULL DEFAULT 'В обробці',
     file VARCHAR(255),
     proposal_Id INT,
     user_Id INT,
@@ -198,6 +201,8 @@ CREATE TABLE result (
     year INT,
     pages INT,
     full_name VARCHAR(255),
+    status ENUM('В обробці', 'Підтверджено', 'Відхилено') NOT NULL DEFAULT 'В обробці',
+    moderation_comment VARCHAR(500) DEFAULT NULL,
     work_Id INT,
     result_type_Id INT,
     magazine_Id INT,
@@ -208,4 +213,128 @@ CREATE TABLE result (
     FOREIGN KEY (magazine_Id) REFERENCES magazine(magazine_Id),
     FOREIGN KEY (conference_Id) REFERENCES conference(conference_Id),
     FOREIGN KEY (competition_Id) REFERENCES competition(competition_Id)
+);
+
+CREATE TABLE link_type (
+    link_type_Id INT PRIMARY KEY AUTO_INCREMENT,
+    link_type_name VARCHAR(255) NOT NULL CHECK(CHAR_LENGTH(TRIM(link_type_name)) > 0),
+    UNIQUE(link_type_name)
+);
+
+CREATE TABLE resource (
+    resource_Id INT PRIMARY KEY AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL UNIQUE,
+    `description` TEXT NOT NULL,
+    link_to_resource VARCHAR(2083) NOT NULL,
+    likes_cache INT NOT NULL DEFAULT 0,
+    views_cache INT NOT NULL DEFAULT 0,
+    publish_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    origination_date DATE,
+    is_verified BOOLEAN NOT NULL DEFAULT FALSE,
+    is_recommended BOOLEAN NOT NULL DEFAULT FALSE,
+    producer VARCHAR(255),
+    author_user_Id INT,
+    link_type_Id INT,
+
+    FOREIGN KEY (author_user_Id) REFERENCES `user`(user_Id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (link_type_Id) REFERENCES link_type(link_type_Id) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE TABLE stack (
+    stack_Id INT PRIMARY KEY AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL UNIQUE,
+    `description` TEXT NOT NULL,
+    likes_cache INT NOT NULL DEFAULT 0,
+    views_cache INT NOT NULL DEFAULT 0,
+    creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_verified BOOLEAN NOT NULL DEFAULT FALSE,
+    is_recommended BOOLEAN NOT NULL DEFAULT FALSE,
+    author_user_Id INT,
+
+    FOREIGN KEY (author_user_Id) REFERENCES `user`(user_Id) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE TABLE interaction_user_resource (
+    interaction_user_resource_Id INT PRIMARY KEY AUTO_INCREMENT,
+    is_liked BIT(1) NOT NULL DEFAULT b'0',
+    is_viewed BIT(1) NOT NULL DEFAULT b'0',
+    is_in_view_later BIT(1) NOT NULL DEFAULT b'0',
+    is_in_favourites BIT(1) NOT NULL DEFAULT b'0',
+    user_Id INT,
+    resource_Id INT NOT NULL,
+
+    UNIQUE(user_Id, resource_Id),
+    FOREIGN KEY (user_Id) REFERENCES `user`(user_Id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (resource_Id) REFERENCES resource(resource_Id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE interaction_user_stack (
+    interaction_user_stack_Id INT PRIMARY KEY AUTO_INCREMENT,
+    is_liked BIT(1) NOT NULL DEFAULT b'0',
+    is_viewed BIT(1) NOT NULL DEFAULT b'0',
+    is_in_view_later BIT(1) NOT NULL DEFAULT b'0',
+    is_in_favourites BIT(1) NOT NULL DEFAULT b'0',
+    user_Id INT,
+    stack_Id INT NOT NULL,
+
+    UNIQUE(user_Id, stack_Id),
+    FOREIGN KEY (user_Id) REFERENCES `user`(user_Id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (stack_Id) REFERENCES stack(stack_Id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE comment (
+    comment_Id INT PRIMARY KEY AUTO_INCREMENT,
+    `text` VARCHAR(800) NOT NULL,
+    likes INT NOT NULL DEFAULT 0,
+    creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    interaction_user_resource_Id INT,
+    interaction_user_stack_Id INT,
+
+    FOREIGN KEY (interaction_user_resource_Id) REFERENCES interaction_user_resource(interaction_user_resource_Id)
+                ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (interaction_user_stack_Id) REFERENCES interaction_user_stack(interaction_user_stack_Id)
+                ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE resourceStack (
+    resource_Id INT NOT NULL,
+    stack_Id INT NOT NULL,
+
+    PRIMARY KEY (resource_Id, stack_Id),
+    FOREIGN KEY (resource_Id) REFERENCES resource(resource_Id)
+                ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (stack_Id) REFERENCES stack(stack_Id)
+                ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE resourceDevelopment_direction (
+    resource_Id INT NOT NULL,
+    development_direction_Id INT NOT NULL,
+
+    PRIMARY KEY (resource_Id, development_direction_Id),
+    FOREIGN KEY (resource_Id) REFERENCES resource(resource_Id)
+                ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (development_direction_Id) REFERENCES development_direction(development_direction_Id)
+                ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE rating (
+    rating_Id INT PRIMARY KEY AUTO_INCREMENT,
+    `name` VARCHAR(255) NOT NULL,
+    rating_authority_link VARCHAR(2083) NOT NULL,
+    publish_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    forming_date DATE NOT NULL
+);
+
+CREATE TABLE ratingResource (
+    rating_position INT NOT NULL CHECK(rating_position > 0),
+    rating_Id INT NOT NULL,
+    resource_Id INT NOT NULL,
+
+    UNIQUE(rating_Id, rating_position),
+    PRIMARY KEY (rating_Id, resource_Id),
+    FOREIGN KEY (rating_Id) REFERENCES rating(rating_Id)
+                ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (resource_Id) REFERENCES resource(resource_Id)
+                ON DELETE CASCADE ON UPDATE CASCADE
 );

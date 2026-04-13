@@ -3,7 +3,7 @@ const router = express.Router();
 const { create, studentCreate, getAll, deleter, studentDelete, update, getFromDb, getMyWorks, updateStatus } = require('../controllers/work');
 const { isAdmin, isStudent } = require('../middlewares/auth');
 
-router.post('/student/create', isStudent, studentCreate); 
+router.post('/student/create', isStudent, studentCreate);
 router.post('/create', isAdmin, create);
 router.get('/user/:user_Id', isStudent, getMyWorks);
 router.get('/getFromDb', isAdmin, getFromDb);

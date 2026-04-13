@@ -1,6 +1,3 @@
-const path = require('path');
-const fs = require('fs');
-const cache = path.join(__dirname, '..', 'cache.json');
 const { Result, Work } = require('../models/Relations');
 
 const create = async (req, res) => {
@@ -27,7 +24,7 @@ const studentCreate = async (req, res) => {
             magazine_Id,
             conference_Id,
             competition_Id,
-            status: 'В обробці' // Дефолтний статус
+            status: 'В обробці'
         });
 
         return res.status(201).json(result);
@@ -65,28 +62,7 @@ const updateStatus = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
-    try {
-        let cacheData = {};
-        if (fs.existsSync(cache)) {
-            try {
-                const fileContent = fs.readFileSync(cache, 'utf-8');
-                if (fileContent) cacheData = JSON.parse(fileContent);
-            } catch (err) { console.error(err); }
-        }
-
-        if (cacheData.results && cacheData.results.length > 0) {
-            return res.status(200).json(cacheData.results);
-        }
-
-        const results = await Result.findAll({});
-        
-        cacheData.results = results;
-        fs.writeFileSync(cache, JSON.stringify(cacheData, null, 2));
-
-        return res.status(200).json(results);
-    } catch (error) {
-        return res.status(500).json({ message: error.message });
-    }
+    getFromDb(req, res);
 };
 
 const getFromDb = async (req, res) => {
@@ -155,11 +131,11 @@ const update = async (req, res) => {
     try {
         const { result_Id } = req.params;
         const { status, moderation_comment, name, year, pages, full_name, work_Id, result_type_Id, magazine_Id, conference_Id, competition_Id } = req.body;
-        
-        const updateData = { 
+
+        const updateData = {
             status,
             moderation_comment,
-            name, year, pages, full_name, work_Id, result_type_Id, magazine_Id, conference_Id, competition_Id 
+            name, year, pages, full_name, work_Id, result_type_Id, magazine_Id, conference_Id, competition_Id
         };
 
         Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);

@@ -14,15 +14,7 @@ const create = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
-    try {
-        const cacheData = JSON.parse(fs.readFileSync(cache, 'utf-8'));
-        if (!cacheData.magazines) {
-            return res.status(404).json({ message: 'magazine not found in cache.' });
-        }
-        return res.status(200).json(cacheData.magazines);
-    } catch (error) {
-        return res.status(500).json({ message: error.message });
-    }
+    getFromDb(req, res);
 };
 
 const getFromDb = async (req, res) => {
@@ -49,7 +41,7 @@ const update = async (req, res) => {
     try {
         const { magazine_Id } = req.params;
         const { name, publisher, city, release_frequency, link } = req.body;
-        const magazine = await Magazine.update({ name, publisher, city, release_frequency, link }, {where: {magazine_Id}});
+        const magazine = await Magazine.update({ name, publisher, city, release_frequency, link }, { where: { magazine_Id } });
         return res.status(200).json(magazine);
     } catch (error) {
         return res.status(500).json({ message: error.message });

@@ -1,6 +1,3 @@
-const path = require('path');
-const fs = require('fs');
-const cache = path.join(__dirname, '..', 'cache.json');
 const Discipline = require('../models/Relations').Discipline;
 
 const create = async (req, res) => {
@@ -14,15 +11,7 @@ const create = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
-    try {
-        const cacheData = JSON.parse(fs.readFileSync(cache, 'utf-8'));
-        if (!cacheData.disciplines) {
-            return res.status(404).json({ message: 'discipline not found in cache.' });
-        }
-        return res.status(200).json(cacheData.disciplines);
-    } catch (error) {
-        return res.status(500).json({ message: error.message });
-    }
+    getFromDb(req, res);
 };
 
 const getFromDb = async (req, res) => {
@@ -44,36 +33,37 @@ const deleter = async (req, res) => {
     }
 };
 
+const { Teacher, Skill } = require('../models/Relations');
+
 const getFull = async (req, res) => {
     try {
-        const cacheData = JSON.parse(fs.readFileSync(cache, 'utf-8'));
-        const {
-            disciplines,
-            disciplineTeachers,
-            teachers,
-            disciplineSkills,
-            skills
-        } = cacheData;
-        const enrichedDisciplines = disciplines.map(discipline => {
-            const relatedTeacherIds = disciplineTeachers
-                .filter(dt => dt.discipline_Id == discipline.discipline_Id)
-                .map(dt => dt.teacher_Id);
-            const teacherNames = teachers
-                .filter(t => relatedTeacherIds.includes(t.teacher_Id))
-                .map(t => t.full_name);
-            const relatedSkillIds = disciplineSkills
-                .filter(ds => ds.discipline_Id == discipline.discipline_Id)
-                .map(ds => ds.skill_Id);
-            const skillNames = skills
-                .filter(s => relatedSkillIds.includes(s.skill_Id))
-                .map(s => s.skill_name);
+        const disciplines = await Discipline.findAll({
+            include: [
+                {
+                    model: Teacher,
+                    attributes: ['full_name'],
+                    through: { attributes: [] }
+                },
+                {
+                    model: Skill,
+                    attributes: ['skill_name'],
+                    through: { attributes: [] }
+                }
+            ]
+        });
+
+        const result = disciplines.map(d => {
+            const data = d.toJSON();
+
             return {
-                ...discipline,
-                teachers: teacherNames.join(', '),
-                skills: skillNames.join(', ')
+                ...data,
+                teachers: (data.Teachers || []).map(t => t.full_name).join(', '),
+                skills: (data.Skills || []).map(s => s.skill_name).join(', ')
             };
         });
-        return res.status(200).json(enrichedDisciplines);
+
+        return res.status(200).json(result);
+
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
@@ -83,7 +73,7 @@ const update = async (req, res) => {
     try {
         const { discipline_Id } = req.params;
         const { discipline_name, discipline_Description, discipline_type, volume, syllabus_link } = req.body;
-        const discipline = await Discipline.update({ discipline_name, discipline_Description, discipline_type, volume, syllabus_link }, {where: {discipline_Id}});
+        const discipline = await Discipline.update({ discipline_name, discipline_Description, discipline_type, volume, syllabus_link }, { where: { discipline_Id } });
         return res.status(200).json(discipline);
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -93,47 +83,40 @@ const update = async (req, res) => {
 const getFullId = async (req, res) => {
     try {
         const { discipline_Id } = req.params;
-        const cacheData = JSON.parse(fs.readFileSync(cache, 'utf-8'));
-        const {
-            disciplines,
-            disciplineTeachers,
-            teachers,
-            disciplineSkills,
-            skills
-        } = cacheData;
-        const discipline = disciplines.find(d => d.discipline_Id == discipline_Id);
+
+        const discipline = await Discipline.findOne({
+            where: { discipline_Id },
+            include: [
+                {
+                    model: Teacher,
+                    attributes: ['full_name', 'position', 'text', 'photo'],
+                    through: { attributes: [] }
+                },
+                {
+                    model: Skill,
+                    attributes: ['skill_name'],
+                    through: { attributes: [] }
+                }
+            ]
+        });
+
         if (!discipline) {
-          return res.status(404).json({ message: 'Discipline not found' });
+            return res.status(404).json({ message: 'Discipline not found' });
         }
-        const relatedTeacherIds = disciplineTeachers
-            .filter(dt => dt.discipline_Id == discipline_Id)
-            .map(dt => dt.teacher_Id);
-        const enrichedTeachers = teachers
-            .filter(t => relatedTeacherIds.includes(t.teacher_Id))
-            .map(t => ({
-                full_name: t.full_name,
-                position: t.position,
-                text: t.text,
-                photo: t.photo
-            }));
-        const relatedSkillIds = disciplineSkills
-            .filter(ds => ds.discipline_Id == discipline_Id)
-            .map(ds => ds.skill_Id);
-        const skillNames = skills
-            .filter(s => relatedSkillIds.includes(s.skill_Id))
-            .map(s => s.skill_name);
-        const enrichedDiscipline = {
-            ...discipline,
-            volume: discipline.volume,
-            teachers: enrichedTeachers,
-            skills: skillNames
-        };
-        return res.status(200).json(enrichedDiscipline);
+
+        const data = discipline.toJSON();
+
+        return res.status(200).json({
+            ...data,
+            teachers: data.Teachers || [],
+            skills: (data.Skills || []).map(s => s.skill_name)
+        });
+
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
 };
-  
+
 module.exports = {
     create,
     getAll,

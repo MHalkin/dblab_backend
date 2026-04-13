@@ -16,15 +16,7 @@ const create = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
-    try {
-        const cacheData = JSON.parse(fs.readFileSync(cache, 'utf-8'));
-        if (!cacheData.skillChapters) {
-            return res.status(404).json({ message: 'skillChapter not found in cache.' });
-        }
-        return res.status(200).json(cacheData.skillChapters);
-    } catch (error) {
-        return res.status(500).json({ message: error.message });
-    }
+    getFromDb(req, res);
 };
 
 const getFromDb = async (req, res) => {
@@ -73,7 +65,7 @@ const update = async (req, res) => {
     try {
         const { skillChapter_Id } = req.params;
         const { skill_Id, chapter_Id } = req.body;
-        const skillChapter = await SkillChapter.update({ skill_Id, chapter_Id }, {where: {skillChapter_Id}});
+        const skillChapter = await SkillChapter.update({ skill_Id, chapter_Id }, { where: { skillChapter_Id } });
         return res.status(200).json(skillChapter);
     } catch (error) {
         return res.status(500).json({ message: error.message });

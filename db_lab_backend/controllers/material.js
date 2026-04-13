@@ -1,6 +1,3 @@
-const path = require('path');
-const fs = require('fs');
-const cache = path.join(__dirname, '..', 'cache.json');
 const Material = require('../models/Relations').Material;
 const Event = require('../models/Relations').Event;
 
@@ -16,11 +13,13 @@ const create = async (req, res) => {
 
 const getAll = async (req, res) => {
     try {
-        const cacheData = JSON.parse(fs.readFileSync(cache, 'utf-8'));
-        if (!cacheData.materials) {
-            return res.status(404).json({ message: 'material not found in cache.' });
+        const materials = await Material.findAll();
+
+        if (!materials || materials.length === 0) {
+            return res.status(404).json({ message: 'material not found.' });
         }
-        return res.status(200).json(cacheData.materials);
+
+        return res.status(200).json(materials);
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
@@ -63,7 +62,7 @@ const update = async (req, res) => {
     try {
         const { material_Id } = req.params;
         const { event_Id, material_name, file, material_type } = req.body;
-        const material = await Material.update({ event_Id, material_name, file, material_type }, {where: {material_Id}});
+        const material = await Material.update({ event_Id, material_name, file, material_type }, { where: { material_Id } });
         return res.status(200).json(material);
     } catch (error) {
         return res.status(500).json({ message: error.message });

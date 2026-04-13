@@ -1,6 +1,3 @@
-const path = require('path');
-const fs = require('fs');
-const cache = path.join(__dirname, '..', 'cache.json');
 const Proposal = require('../models/Relations').Proposal;
 
 const create = async (req, res) => {
@@ -15,21 +12,11 @@ const create = async (req, res) => {
 
 const getAll = async (req, res) => {
     try {
-        let cacheData = {};
-        if (fs.existsSync(cache)) {
-            try {
-                const fileContent = fs.readFileSync(cache, 'utf-8');
-                if (fileContent) cacheData = JSON.parse(fileContent);
-            } catch (err) { console.error(err); }
-        }
+        const proposals = await Proposal.findAll();
 
-        if (cacheData.proposals && cacheData.proposals.length > 0) {
-            return res.status(200).json(cacheData.proposals);
+        if (!proposals || proposals.length === 0) {
+            return res.status(404).json({ message: 'proposal not found.' });
         }
-
-        const proposals = await Proposal.findAll({});
-        cacheData.proposals = proposals;
-        fs.writeFileSync(cache, JSON.stringify(cacheData, null, 2));
 
         return res.status(200).json(proposals);
     } catch (error) {
@@ -75,7 +62,7 @@ const update = async (req, res) => {
     try {
         const { proposal_Id } = req.params;
         const { name, description, status, complexity, teacher_Id, proposal_type_Id, direction_Id } = req.body;
-        const proposal = await Proposal.update({ name, description, status, complexity, teacher_Id, proposal_type_Id, direction_Id }, {where: {proposal_Id}});
+        const proposal = await Proposal.update({ name, description, status, complexity, teacher_Id, proposal_type_Id, direction_Id }, { where: { proposal_Id } });
         return res.status(200).json(proposal);
     } catch (error) {
         return res.status(500).json({ message: error.message });

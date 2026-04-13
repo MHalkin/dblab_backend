@@ -1,6 +1,3 @@
-const path = require('path');
-const fs = require('fs');
-const cache = path.join(__dirname, '..', 'cache.json');
 const DisciplineSkill = require('../models/Relations').DisciplineSkill;
 const Discipline = require('../models/Relations').Discipline;
 const Skill = require('../models/Relations').Skill;
@@ -17,15 +14,7 @@ const create = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
-    try {
-        const cacheData = JSON.parse(fs.readFileSync(cache, 'utf-8'));
-        if (!cacheData.disciplineSkills) {
-            return res.status(404).json({ message: 'disciplineSkill not found in cache.' });
-        }
-        return res.status(200).json(cacheData.disciplineSkills);
-    } catch (error) {
-        return res.status(500).json({ message: error.message });
-    }
+    getFromDb(req, res);
 };
 
 const getFromDb = async (req, res) => {
@@ -35,7 +24,7 @@ const getFromDb = async (req, res) => {
                 {
                     model: Level,
                     attributes: ['level_name'],
-                    required: false 
+                    required: false
                 },
                 {
                     model: Discipline,
@@ -51,7 +40,7 @@ const getFromDb = async (req, res) => {
             const { Level, Discipline, Skill, ...disciplineSkillDate } = disciplineSkill.toJSON();
             return {
                 ...disciplineSkillDate,
-                level_name: Level?Level.level_name:null,
+                level_name: Level ? Level.level_name : null,
                 discipline_name: Discipline.discipline_name,
                 skill_name: Skill.skill_name,
             };
@@ -76,7 +65,7 @@ const update = async (req, res) => {
     try {
         const { disciplineSkill_Id } = req.params;
         const { discipline_Id, skill_Id, level_Id, learning_type } = req.body;
-        const disciplineSkill = await DisciplineSkill.update({ discipline_Id, skill_Id, level_Id, learning_type }, {where: {disciplineSkill_Id}});
+        const disciplineSkill = await DisciplineSkill.update({ discipline_Id, skill_Id, level_Id, learning_type }, { where: { disciplineSkill_Id } });
         return res.status(200).json(disciplineSkill);
     } catch (error) {
         return res.status(500).json({ message: error.message });
