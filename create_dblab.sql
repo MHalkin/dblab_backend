@@ -134,9 +134,19 @@ CREATE TABLE proposal_type (
 CREATE TABLE proposal (
     proposal_Id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(255),
-    description VARCHAR(500),
-    status VARCHAR(100),
-    complexity VARCHAR(100),
+    description VARCHAR(2000), 
+    status ENUM(
+        'Запропоновано', 
+        'Підтвердено', 
+        'Відкладено', 
+        'Завершено',
+        'Є записи'
+    ) DEFAULT 'Запропоновано',
+    complexity ENUM(
+        'Низька',
+        'Середня',
+        'Висока'
+    ),
     teacher_Id INT,
     proposal_type_Id INT,
     direction_Id INT,
