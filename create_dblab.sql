@@ -17,7 +17,7 @@ CREATE TABLE teacher (
     text VARCHAR(500) DEFAULT NULL,
     level VARCHAR(100),
     teacher_role VARCHAR(255),
-    photo MEDIUMBLOB DEFAULT NULL,
+    photo VARCHAR(255) DEFAULT NULL,
     FOREIGN KEY (user_Id) REFERENCES user(user_Id)
 );
 

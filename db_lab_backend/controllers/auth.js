@@ -9,11 +9,11 @@ const login = async (req, res) => {
     try {
         const user = await User.findOne({ where: { [Op.or]: [{ login }, { email }] } })
         if (!user) {
-            return res.status(400).json({ message: 'User not found' });
+            return res.status(400).json({ message: "Invalid login or password" });
         }
         const isPassword = await bcrypt.compare(password, user.password);
         if (!isPassword) {
-            return res.status(400).json({ message: 'Invalid password' });
+            return res.status(400).json({ message: "Invalid login or password" });
         }
 
         const token = jwt.sign({ id: user.user_Id, role: user.role }, process.env.KEY, {
@@ -41,7 +41,7 @@ const register = async (req, res) => {
     try {
         const existing = await User.findOne({ where: { login, email } });
         if (existing) {
-            return res.status(400).json({ message: 'User already exists' });
+            return res.status(400).json({ message: 'User already exists' }); //change when email verifiation is added
         }
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await User.create({ nickname, email, login, password: hashedPassword, role: "student" });
