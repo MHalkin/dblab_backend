@@ -70,6 +70,34 @@ const isAdmin = async (req, res, next) => {
     }
 };
 
+const isExpert = async (req, res, next) => {
+    if (req.method === "OPTIONS") {
+        return next();
+    }
+    try {
+        const authHeader = req.headers['authorization'];
+        if (!authHeader) return res.status(401).json({ message: 'No authorization header' });
+
+        const token = authHeader.split(' ')[1];
+        if (!token) return res.status(401).json({ message: 'No token provided' });
+
+        const decoded = jwt.verify(token, process.env.KEY);
+        const user = await User.findByPk(decoded.id);
+        if (!user) return res.status(401).json({ message: 'User not found' });
+
+        req.user = decoded;
+
+        if (decoded.role === "expert" || decoded.role === "admin") {
+            next();
+        } else {
+            return res.status(403).json({ message: 'Access denied: Experts or Admins only' });
+        }
+    } catch (error) {
+        console.error("Auth Expert Error:", error.message);
+        return res.status(401).json({ message: "Invalid token" });
+    }
+};
+
 const getUser = async (req, res, next) => {
     try {
         const token = req.headers['authorization'].split(' ')[1];
@@ -85,5 +113,6 @@ const getUser = async (req, res, next) => {
 module.exports = {
     isStudent,
     isAdmin,
+    isExpert,
     getUser
 };

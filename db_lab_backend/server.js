@@ -40,6 +40,14 @@ const resultRoutes = require('./routes/result.js');
 const statisticsRoutes = require('./routes/statistics.js');
 const reportRoutes = require('./routes/report.js');
 
+const projectRoutes = require('./routes/project.js');
+const modelRoutes = require('./routes/dataModel.js');
+const expertiseRoutes = require('./routes/expertise.js');
+const imbedRoutes = require('./routes/imbed.js');
+const projectCommentRoutes = require('./routes/projectComment.js');
+const expertRequestRoutes = require('./routes/expertRequest.js');
+
+
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
@@ -76,6 +84,13 @@ app.use('/competition', competitionRoutes);
 app.use('/result', resultRoutes);
 app.use('/statistics', statisticsRoutes);
 app.use('/report', reportRoutes);
+
+app.use('/project', projectRoutes);
+app.use('/model', modelRoutes);
+app.use('/expertise', expertiseRoutes);
+app.use('/imbed', imbedRoutes);
+app.use('/projectComment', projectCommentRoutes);
+app.use('/expertRequest', expertRequestRoutes);
 
 db.sequelize.sync()
     .then(() => {

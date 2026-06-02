@@ -59,18 +59,17 @@ const uploadPhoto = async (req, res) => {
         }
 
         if (teacher.photo) {
-            const oldFilename = teacher.photo.split('/').pop();
-            const oldPath = path.join(__dirname, '../uploads', oldFilename);
-            if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+            const oldPath = path.join(__dirname, '../uploads', teacher.photo);
+            if (fs.existsSync(oldPath)) {
+                fs.unlinkSync(oldPath);
+            }
         }
 
-        const newLink = `${req.protocol}://${req.get('host')}${process.env.LINK}/teacher/photo/file/${req.file.filename}`;
-
-        await teacher.update({ photo: newLink });
+        await teacher.update({ photo: req.file.filename });
 
         return res.status(200).json({
             message: 'Photo uploaded and link saved',
-            link: newLink
+            link: req.file.filename
         });
     } catch (error) {
         if (fs.existsSync(req.file.path)) {
@@ -83,7 +82,8 @@ const uploadPhoto = async (req, res) => {
 const servePhotoFile = async (req, res) => {
     try {
         const { filename } = req.params;
-        const filePath = path.join(__dirname, '../uploads', filename);
+        const safeFilename = path.basename(filename);
+        const filePath = path.join(__dirname, '../uploads', safeFilename);
 
         if (!fs.existsSync(filePath)) {
             return res.status(404).json({ message: 'File not found' });
@@ -99,14 +99,19 @@ const deleter = async (req, res) => {
     try {
         const { teacher_Id } = req.params;
         const teacher = await Teacher.findByPk(teacher_Id);
+        if (!teacher) return res.status(404).json({ message: "Teacher not found" });
 
-        if (teacher && teacher.photo) {
-            const filename = teacher.photo.split('/').pop();
-            const filePath = path.join(__dirname, '../uploads', filename);
-            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-        }
+        const filename = teacher.photo;
 
         await Teacher.destroy({ where: { teacher_Id } });
+
+        if (filename) {
+            const filePath = path.join(__dirname, '../uploads', filename);
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+            }
+        }
+
         return res.status(200).json({ message: 'Teacher and file removed' });
     } catch (error) {
         return res.status(500).json({ message: error.message });
