@@ -90,9 +90,11 @@ CREATE TABLE stage (
 
 CREATE TABLE functional_dependency (
     fd_id INT NOT NULL AUTO_INCREMENT,
+    table_id INT NOT NULL,
     level VARCHAR(100) NULL,
     colour VARCHAR(50) NULL,
-    PRIMARY KEY (fd_id)
+    PRIMARY KEY (fd_id),
+    FOREIGN KEY (table_id) REFERENCES `table`(table_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE fd_stage (
@@ -134,9 +136,11 @@ CREATE TABLE ending_fd (
 
 CREATE TABLE `table` (
     table_id INT NOT NULL AUTO_INCREMENT,
+    stage_id INT NOT NULL,
     name VARCHAR(255) NULL,
     colour VARCHAR(50) NULL,
-    PRIMARY KEY (table_id)
+    PRIMARY KEY (table_id),
+    FOREIGN KEY (stage_id) REFERENCES stage(stage_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE table_attribute (

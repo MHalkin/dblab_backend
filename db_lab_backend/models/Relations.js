@@ -243,6 +243,12 @@ Dependency.belongsTo(TableDb, { as: 'Table1', foreignKey: 'table1_id' });
 TableDb.hasMany(Dependency, { as: 'Table2Dependencies', foreignKey: 'table2_id', onDelete: 'CASCADE' });
 Dependency.belongsTo(TableDb, { as: 'Table2', foreignKey: 'table2_id' });
 
+Stage.hasMany(TableDb, { foreignKey: 'stage_id', onDelete: 'CASCADE' });
+TableDb.belongsTo(Stage, { foreignKey: 'stage_id' });
+
+TableDb.hasMany(FunctionalDependency, { foreignKey: 'table_id', onDelete: 'CASCADE' });
+FunctionalDependency.belongsTo(TableDb, { foreignKey: 'table_id' });
+
 module.exports = {
   User, Teacher, Language, Discipline, DisciplineTeacher, Lesson, Event, Material,
   DevelopmentDirection, Level, Chapter, Skill, SkillChapter, DisciplineSkill,
