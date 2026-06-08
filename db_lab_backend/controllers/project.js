@@ -49,7 +49,7 @@ const getAll = async (req, res) => {
             reviewers: p.Expertises.map(e => ({
                 user_Id: e.User.user_id,
                 nickname: e.User.nickname,
-                status: p.status
+                status: e.end_date ? 'completed' : 'pending'
             })),
             isarchived: p.isarchived,
         }));
