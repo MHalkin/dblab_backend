@@ -1,4 +1,4 @@
-const { Project, Expertise, ProjectComment } = require('../models/Relations');
+const { Project, User, Expertise, ProjectComment } = require('../models/Relations');
 
 const isParentArchived = async (comment) => {
     if (comment.project_id) {
@@ -98,12 +98,20 @@ const deleter = async (req, res) => {
 const getThread = async (req, res) => {
     try {
         const { id } = req.params;
-        const root = await ProjectComment.findByPk(id);
+
+        const root = await ProjectComment.findByPk(id, {
+            include: [{ model: User, attributes: ['user_Id', 'nickname'] }]
+        });
         if (!root) return res.status(404).json({ message: "Not found" });
 
         const fetchReplies = async (parentId, depth) => {
             if (depth >= 6) return [];
-            const replies = await ProjectComment.findAll({ where: { previous_comment_id: parentId } });
+
+            const replies = await ProjectComment.findAll({
+                where: { previous_comment_id: parentId },
+                include: [{ model: User, attributes: ['user_Id', 'nickname'] }]
+            });
+
             for (let reply of replies) {
                 reply.dataValues.replies = await fetchReplies(reply.comment_id, depth + 1);
             }
