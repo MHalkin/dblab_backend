@@ -19,16 +19,23 @@ const isStudent = async (req, res, next) => {
 
         const decoded = jwt.verify(token, process.env.KEY);
 
-        const user = await User.findByPk(decoded.id);
+        const user = await User.findByPk(decoded.id, {
+            attributes: ['user_Id', 'role'],
+            raw: true
+        });
+
         if (!user) {
             return res.status(401).json({ message: 'User not found' });
         }
 
-        req.user = user;
+        req.user = {
+            id: user.user_Id,
+            role: user.role,
+        };
 
         return next();
     } catch (error) {
-        console.error("Auth Error:", error.message);
+        console.error("Auth Base Error:", error.message);
         return res.status(401).json({ message: "Invalid token" });
     }
 };
@@ -80,12 +87,20 @@ const isExpert = async (req, res, next) => {
         if (!token) return res.status(401).json({ message: 'No token provided' });
 
         const decoded = jwt.verify(token, process.env.KEY);
-        const user = await User.findByPk(decoded.id);
+
+        const user = await User.findByPk(decoded.id, {
+            attributes: ['id', 'role'],
+            raw: true
+        });
+
         if (!user) return res.status(401).json({ message: 'User not found' });
 
-        req.user = user;
+        req.user = {
+            id: user.id,
+            role: user.role,
+        };
 
-        if (user.role === "expert" || user.role === "admin") {
+        if (req.user.role === "expert" || req.user.role === "admin") {
             next();
         } else {
             return res.status(403).json({ message: 'Access denied: Experts or Admins only' });
