@@ -8,7 +8,10 @@ const getAll = async (req, res) => {
 
         const requests = await ExpertRequest.findAll({
             where: whereClause,
-            include: [{ model: User, attributes: ['email'] }]
+            include: [{
+                model: User,
+                attributes: { exclude: ['password'] }
+            }]
         });
         return res.status(200).json(requests);
     } catch (error) { return res.status(500).json({ message: error.message }); }
