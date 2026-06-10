@@ -4,31 +4,29 @@ const User = require(path.join(__dirname, '..', 'models', 'Relations')).User;
 
 const isStudent = async (req, res, next) => {
     if (req.method === "OPTIONS") {
-        next();
+        return next();
     }
     try {
         const authHeader = req.headers['authorization'];
-
         if (!authHeader) {
             return res.status(401).json({ message: 'No authorization header' });
         }
 
         const token = authHeader.split(' ')[1];
-
         if (!token) {
             return res.status(401).json({ message: 'No token provided' });
         }
 
         const decoded = jwt.verify(token, process.env.KEY);
 
-        // Зберігаємо user_Id в запиті для подальшого використання
-        req.user = decoded;
-
         const user = await User.findByPk(decoded.id);
         if (!user) {
             return res.status(401).json({ message: 'User not found' });
         }
-        next();
+
+        req.user = user;
+
+        return next();
     } catch (error) {
         console.error("Auth Error:", error.message);
         return res.status(401).json({ message: "Invalid token" });
@@ -59,7 +57,7 @@ const isAdmin = async (req, res, next) => {
             return res.status(401).json({ message: 'User not found' });
         }
 
-        if (decoded.role === "admin") {
+        if (user.role === "admin") {
             next();
         } else {
             return res.status(403).json({ message: 'Access denied: Admins only' });
@@ -85,9 +83,9 @@ const isExpert = async (req, res, next) => {
         const user = await User.findByPk(decoded.id);
         if (!user) return res.status(401).json({ message: 'User not found' });
 
-        req.user = decoded;
+        req.user = user;
 
-        if (decoded.role === "expert" || decoded.role === "admin") {
+        if (user.role === "expert" || user.role === "admin") {
             next();
         } else {
             return res.status(403).json({ message: 'Access denied: Experts or Admins only' });
