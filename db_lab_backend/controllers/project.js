@@ -22,14 +22,14 @@ const getAll = async (req, res) => {
             include: [
                 {
                     model: User,
-                    attributes: ['user_id', 'nickname']
+                    attributes: ['user_Id', 'nickname']
                 },
                 {
                     model: Expertise,
                     include: [
                         {
                             model: User,
-                            attributes: ['user_id', 'nickname']
+                            attributes: ['user_Id', 'nickname']
                         }
                     ]
                 }
@@ -44,10 +44,10 @@ const getAll = async (req, res) => {
             status: p.status,
             is_for_expertise: p.isexpertise,
             is_for_normalization: p.isnormalisation,
-            author_user_Id: p.user_id,
+            author_user_Id: p.user_Id,
             author_nickname: p.User ? p.User.nickname : null,
             reviewers: p.Expertises.map(e => ({
-                user_Id: e.User.user_id,
+                user_Id: e.User.user_Id,
                 nickname: e.User.nickname,
                 status: e.end_date ? 'completed' : 'pending'
             })),
@@ -65,7 +65,7 @@ const getById = async (req, res) => {
         const { id } = req.params;
         const project = await Project.findByPk(id, {
             include: [
-                { model: User, attributes: ['user_id', 'nickname'] },
+                { model: User, attributes: ['user_Id', 'nickname'] },
                 { model: DataModel },
                 {
                     model: Stage,
@@ -86,13 +86,13 @@ const getById = async (req, res) => {
                 {
                     model: Expertise,
                     include: [
-                        { model: User, attributes: ['user_id', 'nickname'] },
+                        { model: User, attributes: ['user_Id', 'nickname'] },
                         { model: Imbed }
                     ]
                 },
                 {
                     model: ProjectComment,
-                    include: [{ model: User, attributes: ['user_id', 'nickname'] }, { model: ProjectComment, as: 'Replies' }],
+                    include: [{ model: User, attributes: ['user_Id', 'nickname'] }, { model: ProjectComment, as: 'Replies', include: [{ model: User, attributes: ['user_Id', 'nickname'] }] }],
                     order: [['comment_id', 'ASC']]
                 }
             ]
@@ -123,7 +123,7 @@ const getById = async (req, res) => {
                 id: `attr-${a.attribute_id}`, name: a.name, data_type: a.data_type,
                 introduced_at_stage_Id: `stage-${s.form.toLowerCase()}`, retired_at_stage_Id: null
             }))),
-            author: { user_Id: project.User.user_id, nickname: project.User.nickname },
+            author: { user_Id: project.User.user_Id, nickname: project.User.nickname },
             models: project.DataModels.map(dm => ({ data_model_Id: dm.data_model_id, type: dm.type, file_url: dm.file, upload_date: dm.upload_date })),
             stages: project.Stages.map(s => ({
                 stageId: `stage-${s.form.toLowerCase()}`,
@@ -145,13 +145,14 @@ const getById = async (req, res) => {
             })),
             expertises: project.Expertises.map(e => ({
                 expertise_Id: e.expertise_id, review_text: e.text, score: e.mark, begin_date: e.begin_date, end_date: e.end_date,
-                expert: { user_Id: e.User.user_id, nickname: e.User.nickname },
+                expert: { user_Id: e.User.user_Id, nickname: e.User.nickname },
                 attachments: e.Imbeds.map(i => ({ attachment_Id: i.imbed_id, link_url: i.link }))
             })),
             comments: project.ProjectComments.filter(c => c.previous_comment_id === null).map(c => ({
                 comment_Id: c.comment_id, text: c.text, creation_date: c.date, score: c.mark, reply_to_Id: c.previous_comment_id,
-                author: c.User ? { user_Id: c.User.user_id, nickname: c.User.nickname } : null,
-                replies: c.Replies.map(r => ({ comment_Id: r.comment_id, text: r.text, creation_date: r.date, score: r.mark, author: r.User ? { user_Id: r.User.user_id, nickname: r.User.nickname } : null }))
+                expertise_Id: c.expertise_id,
+                author: c.User ? { user_Id: c.User.user_Id, nickname: c.User.nickname } : null,
+                replies: c.Replies.map(r => ({ comment_Id: r.comment_id, text: r.text, creation_date: r.date, score: r.mark, expertise_Id: r.expertise_id, author: r.User ? { user_Id: r.User.user_Id, nickname: r.User.nickname } : null }))
             }))
         };
         return res.status(200).json(response);

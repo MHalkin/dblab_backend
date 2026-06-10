@@ -19,18 +19,37 @@ const create = async (req, res) => {
     try {
         const { text, reply_to_id, projectId, expertiseId } = req.body;
 
-        if (projectId) {
-            const proj = await Project.findByPk(projectId);
-            if (proj && proj.isarchived) return res.status(403).json({ message: "Project is archived" });
+        if (!projectId) {
+            return res.status(401).json("No project found");
         }
+
+        const proj = await Project.findByPk(projectId);
+        if (!proj) return res.status(404).json({ message: "Project not found" });
+        if (proj.isarchived) return res.status(403).json({ message: "Project is archived" });
+
         if (expertiseId) {
-            const exp = await Expertise.findByPk(expertiseId, { include: [Project] });
-            if (exp && exp.Project && exp.Project.isarchived) return res.status(403).json({ message: "Project is archived" });
+            const exp = await Expertise.findByPk(expertiseId);
+            if (!exp) {
+                return res.status(404).json({ message: "Expertise not found" });
+            }
+            if (Number(exp.project_id) !== Number(projectId)) {
+                return res.status(400).json({ message: "Expertise does not belong to this project" });
+            }
+        }
+
+        if (reply_to_id) {
+            const parentComment = await ProjectComment.findByPk(reply_to_id);
+            if (!parentComment) {
+                return res.status(404).json({ message: "Parent comment not found" });
+            }
+            if (Number(parentComment.project_id) !== Number(projectId)) {
+                return res.status(400).json({ message: "Cannot reply to a comment from a different project" });
+            }
         }
 
         const newComment = await ProjectComment.create({
             user_id: req.user.id,
-            project_id: projectId || null,
+            project_id: projectId,
             expertise_id: expertiseId || null,
             previous_comment_id: reply_to_id || null,
             text,

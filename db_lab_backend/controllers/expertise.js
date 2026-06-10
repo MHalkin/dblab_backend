@@ -21,6 +21,11 @@ const create = async (req, res) => {
             end_date: null
         });
 
+        if (project.status !== 'reviewed') {
+            project.status = 'in-review';
+            await project.save();
+        }
+
         return res.status(201).json(newExpertise);
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -47,6 +52,12 @@ const update = async (req, res) => {
         expertise.end_date = new Date();
 
         await expertise.save();
+
+        if (expertise.Project) {
+            expertise.Project.status = 'reviewed';
+            await expertise.Project.save();
+        }
+
         return res.status(200).json(expertise);
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -76,7 +87,31 @@ const deleter = async (req, res) => {
             return res.status(403).json({ message: "Unauthorized" });
         }
 
+        const projectId = expertise.project_id;
+        const projectInstance = expertise.Project;
+
         await expertise.destroy();
+
+        if (projectInstance) {
+            const remaining = await Expertise.findAll({
+                where: { project_id: projectId }
+            });
+
+            if (remaining.length === 0) {
+                projectInstance.status = 'pending';
+            } else {
+                const hasFinishedExpertise = remaining.some(e => e.end_date !== null);
+
+                if (hasFinishedExpertise) {
+                    projectInstance.status = 'reviewed';
+                } else {
+                    projectInstance.status = 'in-review';
+                }
+            }
+
+            await projectInstance.save();
+        }
+
         return res.status(200).json({ message: "Deleted" });
     } catch (error) {
         return res.status(500).json({ message: error.message });

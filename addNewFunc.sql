@@ -62,7 +62,7 @@ CREATE TABLE expert_request (
 CREATE TABLE project_comment (
     comment_id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
-    project_id INT NULL,
+    project_id INT NOT NULL,
     previous_comment_id INT NULL,
     expertise_id INT NULL,
     text VARCHAR(255) NULL,
