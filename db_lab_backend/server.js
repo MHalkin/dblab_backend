@@ -47,6 +47,8 @@ const imbedRoutes = require('./routes/imbed.js');
 const projectCommentRoutes = require('./routes/projectComment.js');
 const expertRequestRoutes = require('./routes/expertRequest.js');
 
+const storageRoutes = require('./routes/storage.js');
+
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -91,6 +93,8 @@ app.use('/expertise', expertiseRoutes);
 app.use('/imbed', imbedRoutes);
 app.use('/projectComment', projectCommentRoutes);
 app.use('/expertRequest', expertRequestRoutes);
+
+app.use('/storage', storageRoutes);
 
 db.sequelize.sync()
     .then(() => {
