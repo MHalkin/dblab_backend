@@ -50,9 +50,27 @@ const deleter = async (req, res) => {
     } catch (error) { return res.status(500).json({ message: error.message }); }
 };
 
+const getOwn = async (req, res) => {
+    try {
+        const requests = await ExpertRequest.findAll({
+            where: { user_id: req.user.id },
+            order: [['creation_date', 'DESC']]
+        });
+
+        if (!requests || requests.length === 0) {
+            return res.status(404).json({ message: "You haven't submitted any requests yet." });
+        }
+
+        return res.status(200).json(requests);
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+};
+
 module.exports = {
     create,
     deleter,
     update,
-    getAll
+    getAll,
+    getOwn
 };
