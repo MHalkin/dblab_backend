@@ -239,12 +239,17 @@ const updateProjectFull = async (req, res) => {
             newStageIds.push(stage.stage_id);
         }
 
+        const attributeIdMap = {};
         for (const attr of (attributePool || [])) {
             const realStageId = newStageIds[attr.introduced_at_stage_id - 1];
-            await Attribute.create({
-                attribute_id: attr.attribute_id, name: attr.name, data_type: attr.data_type,
+            const newAttribute = await Attribute.create({
+                name: attr.name, data_type: attr.data_type,
                 stage_id: realStageId, project_id: id
             }, { transaction: t });
+
+            if (attr.attribute_id) {
+                attributeIdMap[attr.attribute_id] = newAttribute.attribute_id;
+            }
         }
 
         const newTableIds = [];
@@ -260,9 +265,14 @@ const updateProjectFull = async (req, res) => {
                 newTableIds.push(table.table_id);
 
                 for (const ta of (tableData.tableAttributes || [])) {
+                    const realAttributeId = attributeIdMap[ta.attribute_id] || ta.attribute_id;
+
                     await TableAttribute.create({
-                        table_id: table.table_id, attribute_id: ta.attribute_id,
-                        ispk: ta.ispk, isfk: ta.isfk, pseudonim: ta.pseudonim
+                        table_id: table.table_id,
+                        attribute_id: realAttributeId,
+                        ispk: ta.ispk,
+                        isfk: ta.isfk,
+                        pseudonim: ta.pseudonim
                     }, { transaction: t });
                 }
             }
@@ -292,10 +302,13 @@ const updateProjectFull = async (req, res) => {
                 }, { transaction: t });
 
                 for (const start of (fdData.starts || [])) {
-                    await BeginingFd.create({ functional_dependency_id: fd.fd_id, attribute_id: start.attribute_id }, { transaction: t });
+                    const realStartAttrId = attributeIdMap[start.attribute_id] || start.attribute_id;
+                    await BeginingFd.create({ functional_dependency_id: fd.fd_id, attribute_id: realStartAttrId }, { transaction: t });
                 }
+
                 for (const end of (fdData.ends || [])) {
-                    await EndingFd.create({ functional_dependency_id: fd.fd_id, attribute_id: end.attribute_id }, { transaction: t });
+                    const realEndAttrId = attributeIdMap[end.attribute_id] || end.attribute_id;
+                    await EndingFd.create({ functional_dependency_id: fd.fd_id, attribute_id: realEndAttrId }, { transaction: t });
                 }
             }
         }
