@@ -89,14 +89,14 @@ const isExpert = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.KEY);
 
         const user = await User.findByPk(decoded.id, {
-            attributes: ['id', 'role'],
+            attributes: ['user_Id', 'role'],
             raw: true
         });
 
         if (!user) return res.status(401).json({ message: 'User not found' });
 
         req.user = {
-            id: user.id,
+            id: user.user_Id,
             role: user.role,
         };
 
