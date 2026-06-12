@@ -1,5 +1,8 @@
+const path = require('path');
+const fs = require('fs').promises;
 const Expertise = require('../models/Expertise');
 const Project = require('../models/Project');
+const Imbed = require('../models/Imbed');
 
 const create = async (req, res) => {
     try {
@@ -87,6 +90,20 @@ const deleter = async (req, res) => {
             return res.status(403).json({ message: "Unauthorized" });
         }
 
+        const imbeds = await Imbed.findAll({ where: { expertise_id: expertise.expertise_id } });
+        const targetDir = path.join(__dirname, '../uploads/data');
+
+        for (const imbed of imbeds) {
+            if (imbed.link) {
+                const filePath = path.join(targetDir, path.basename(imbed.link));
+                try {
+                    await fs.unlink(filePath);
+                } catch (err) {
+                    console.error(`Cleanup notice: File ${imbed.link} not found.`);
+                }
+            }
+        }
+
         const projectId = expertise.project_id;
         const projectInstance = expertise.Project;
 
@@ -101,12 +118,7 @@ const deleter = async (req, res) => {
                 projectInstance.status = 'pending';
             } else {
                 const hasFinishedExpertise = remaining.some(e => e.end_date !== null);
-
-                if (hasFinishedExpertise) {
-                    projectInstance.status = 'reviewed';
-                } else {
-                    projectInstance.status = 'in-review';
-                }
+                projectInstance.status = hasFinishedExpertise ? 'reviewed' : 'in-review';
             }
 
             await projectInstance.save();

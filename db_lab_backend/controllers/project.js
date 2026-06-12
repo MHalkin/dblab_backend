@@ -14,6 +14,8 @@ const {
     Expertise,
     Imbed
 } = require('../models/Relations.js');
+const fs = require('fs').promises;
+const path = require('path');
 const db = require('../config/db.config.js');
 
 const getAll = async (req, res, type) => {
@@ -341,9 +343,58 @@ const deleter = async (req, res) => {
             return res.status(403).json({ message: "Access denied." });
         }
 
+        const targetDir = path.join(__dirname, '../uploads/data');
+        const filesToDelete = new Set();
+
+        const dataModels = await DataModel.findAll({
+            where: { project_id: id },
+            attributes: ['file'],
+            raw: true
+        });
+
+        dataModels.forEach(dm => {
+            if (dm.file) filesToDelete.add(dm.file.trim());
+        });
+
+        const expertiseRecords = await Expertise.findAll({
+            where: { project_id: id },
+            attributes: ['expertise_id'],
+            raw: true
+        });
+
+        const expertiseIds = expertiseRecords.map(exp => exp.expertise_id);
+
+        if (expertiseIds.length > 0) {
+            const imbeds = await Imbed.findAll({
+                where: { expertise_id: expertiseIds },
+                attributes: ['link'],
+                raw: true
+            });
+
+            imbeds.forEach(imb => {
+                if (imb.link) {
+                    filesToDelete.add(path.basename(imb.link).trim());
+                }
+            });
+        }
+
+        const deletionPromises = Array.from(filesToDelete).map(async (filename) => {
+            const filePath = path.join(targetDir, filename);
+            try {
+                await fs.access(filePath);
+                await fs.unlink(filePath);
+            } catch (err) {
+                console.error(`Cleanup notice: Physical file ${filename} not found or already deleted.`);
+            }
+        });
+
+        await Promise.all(deletionPromises);
         await project.destroy();
 
-        return res.status(200).json({ message: "Project deleted successfully" });
+        return res.status(200).json({
+            message: "Project and all associated physical assets deleted successfully",
+            purgedFilesCount: filesToDelete.size
+        });
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }

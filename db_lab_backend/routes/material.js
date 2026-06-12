@@ -8,7 +8,7 @@ const {
     uploadFile,
     serveMaterialFile
 } = require('../controllers/material.js');
-const { isAdmin } = require('../middlewares/auth.js');
+const { isAdmin, isStudent } = require('../middlewares/auth.js');
 const upload = require('../middlewares/multerMaterial.js');
 const router = express.Router();
 
