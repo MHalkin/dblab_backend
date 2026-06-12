@@ -50,6 +50,10 @@ const update = async (req, res) => {
             return res.status(403).json({ message: "Cannot modify expertise: Project is archived." });
         }
 
+        if (req.body.score > 100 || req.body.score < 0) {
+            return res.status(403).json({ message: "Score must be between 0 and 100" });
+        }
+
         expertise.mark = req.body.score;
         expertise.text = req.body.review_text;
         expertise.end_date = new Date();
