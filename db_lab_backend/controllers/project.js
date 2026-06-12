@@ -16,9 +16,10 @@ const {
 } = require('../models/Relations.js');
 const db = require('../config/db.config.js');
 
-const getAll = async (req, res) => {
+const getAll = async (req, res, type) => {
     try {
         const projects = await Project.findAll({
+            where: type === 1 ? { isexpertise: true } : type === 0 ? { isnormalisation: true } : {},
             include: [
                 {
                     model: User,
@@ -46,11 +47,11 @@ const getAll = async (req, res) => {
             is_for_normalization: p.isnormalisation,
             author_user_Id: p.user_Id,
             author_nickname: p.User ? p.User.nickname : null,
-            reviewers: p.Expertises.map(e => ({
-                user_Id: e.User.user_Id,
-                nickname: e.User.nickname,
+            reviewers: p.Expertises ? p.Expertises.map(e => ({
+                user_Id: e.User ? e.User.user_Id : null,
+                nickname: e.User ? e.User.nickname : null,
                 status: e.end_date ? 'completed' : 'pending'
-            })),
+            })) : [],
             isarchived: p.isarchived,
         }));
 
@@ -59,6 +60,8 @@ const getAll = async (req, res) => {
         return res.status(500).json({ message: error.message });
     }
 };
+
+module.exports = { getAll };
 
 const getById = async (req, res) => {
     try {
@@ -162,7 +165,7 @@ const create = async (req, res) => {
     const t = await db.sequelize.transaction();
 
     try {
-        const { name, description } = req.body;
+        const { name, description, isexpertise, isnormalisation } = req.body;
 
         const newProject = await Project.create({
             name,
@@ -170,8 +173,8 @@ const create = async (req, res) => {
             user_id: req.user.id,
             creation_date: new Date(),
             status: 'pending',
-            isexpertise: false,
-            isnormalisation: false,
+            isexpertise: isexpertise || false,
+            isnormalisation: isnormalisation || false,
             isarchived: false
         }, { transaction: t });
 
