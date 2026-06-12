@@ -75,7 +75,7 @@ const deleter = async (req, res) => {
         const isAdmin = req.user.role === 'admin';
         const isOwner = expertise.user_id === req.user.id;
 
-        if (expertise.Project && expertise.Project.isarchived) {
+        if (expertise.Project && expertise.Project.isarchived && !isAdmin) {
             return res.status(403).json({ message: "Cannot modify expertise: Project is archived." });
         }
 

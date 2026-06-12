@@ -76,7 +76,6 @@ const getById = async (req, res) => {
                             include: [
                                 { model: TableAttribute },
                                 { model: FunctionalDependency, include: [BeginingFd, EndingFd] },
-                                // Dependencies are now included under TableDb
                                 { model: Dependency, as: 'Table1Dependencies' },
                                 { model: Dependency, as: 'Table2Dependencies' }
                             ]
@@ -100,7 +99,6 @@ const getById = async (req, res) => {
 
         if (!project) return res.status(404).json({ message: "Project not found" });
 
-        // Helper to collect all unique dependencies per stage
         const getUniqueDeps = (tables) => {
             const deps = new Map();
             tables.forEach(t => {
@@ -119,6 +117,7 @@ const getById = async (req, res) => {
             status: project.status,
             is_for_expertise: project.isexpertise,
             is_for_normalization: project.isnormalisation,
+            is_archived: project.isarchived,
             attributePool: project.Stages.flatMap(s => s.Attributes.map(a => ({
                 id: `attr-${a.attribute_id}`, name: a.name, data_type: a.data_type,
                 introduced_at_stage_Id: `stage-${s.form.toLowerCase()}`, retired_at_stage_Id: null
@@ -331,7 +330,7 @@ const deleter = async (req, res) => {
             return res.status(404).json({ message: "Project not found" });
         }
 
-        if (project.isarchived) {
+        if (project.isarchived && req.user.role !== "admin") {
             return res.status(403).json({ message: "Cannot delete an archived project." });
         }
 

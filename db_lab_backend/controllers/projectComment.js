@@ -81,8 +81,10 @@ const deleter = async (req, res) => {
         const comment = await ProjectComment.findByPk(req.params.id);
         if (!comment) return res.status(404).json({ message: "Comment not found" });
 
-        if (await isParentArchived(comment)) {
-            return res.status(403).json({ message: "Cannot delete: Project is archived" });
+        if (req.user.role !== "admin") {
+            if (await isParentArchived(comment)) {
+                return res.status(403).json({ message: "Cannot delete: Project is archived" });
+            }
         }
 
         if (comment.user_id !== req.user.id && req.user.role !== 'admin') {
