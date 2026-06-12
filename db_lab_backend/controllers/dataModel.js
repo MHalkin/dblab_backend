@@ -128,7 +128,7 @@ const deleter = async (req, res) => {
             return res.status(403).json({ message: "Access denied" });
         }
 
-        if (project.isarchived) {
+        if (project.isarchived && req.user.role !== "admin") {
             return res.status(403).json({ message: "Cannot delete an archived project." });
         }
 
