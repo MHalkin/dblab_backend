@@ -7,6 +7,6 @@ const upload = require('../middlewares/multerData.js');
 router.post('/create/:id', isStudent, upload.single('file'), create);
 router.delete('/delete/:id', isStudent, deleter);
 
-router.get('/photo/file/:filename', servePhotoFile);
+router.get('/photo/file/:filename', isStudent, servePhotoFile);
 
 module.exports = router;
