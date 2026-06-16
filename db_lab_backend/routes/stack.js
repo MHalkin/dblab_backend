@@ -1,20 +1,20 @@
 const express = require('express');
-const { 
-    create, 
-    getRecentStacksPreview, 
-    getAllByAuthor, 
-    getById, 
-    update, 
-    deleter, 
-    addResource, 
+const {
+    create,
+    getRecentStacksPreview,
+    getAllByAuthor,
+    getById,
+    update,
+    deleter,
+    addResource,
     removeResource,
     getResourceIds
 } = require('../controllers/stack.js');
-const { getUser } = require('../middlewares/auth.js');
+const { isStudent, isVerified, getUser } = require('../middlewares/auth.js');
 
 const router = express.Router();
 
-router.use(getUser);
+router.use(isStudent, isVerified, getUser);
 
 router.post('/create', create);
 router.get('/getRecentStacksPreview/:page/:page_size', getRecentStacksPreview);

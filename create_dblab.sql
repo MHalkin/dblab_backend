@@ -5,7 +5,8 @@ CREATE TABLE user (
     login VARCHAR(255) UNIQUE,
     password VARCHAR(255),
     role VARCHAR(50),
-    student_group VARCHAR(50) DEFAULT NULL 
+    student_group VARCHAR(50) DEFAULT NULL ,
+    verified BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE TABLE teacher (

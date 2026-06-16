@@ -1,8 +1,8 @@
 const express = require('express');
-const {create, deleter, update, getFromDb, getRecentResourcesPreview, getById, getAllByAuthor, search} = require('../controllers/resource.js');
-const { getUser } = require('../middlewares/auth.js');
+const { create, deleter, update, getFromDb, getRecentResourcesPreview, getById, getAllByAuthor, search } = require('../controllers/resource.js');
+const { isStudent, isVerified, getUser } = require('../middlewares/auth.js');
 const router = express.Router();
-router.use(getUser);
+router.use(isStudent, isVerified, getUser);
 
 router.post('/create', create);
 router.delete('/delete/:resource_Id', deleter);

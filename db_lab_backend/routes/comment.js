@@ -1,9 +1,9 @@
 const express = require('express');
 const { createForResource, deleteResourceComment, updateTextForResourseComment, getFromDb, getForResource, switchLike, createForStack, getForStack, deleteStackComment, updateTextForStackComment }
        = require('../controllers/comment.js');
-const { getUser, isAdmin, isStudent } = require('../middlewares/auth.js');
+const { getUser, isAdmin, isStudent, isVerified } = require('../middlewares/auth.js');
 const router = express.Router();
-router.use(isStudent, getUser);
+router.use(isStudent, isVerified, getUser);
 
 router.post('/createForResource', createForResource);
 router.post('/createForStack', createForStack);

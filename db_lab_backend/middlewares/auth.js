@@ -20,7 +20,7 @@ const isStudent = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.KEY);
 
         const user = await User.findByPk(decoded.id, {
-            attributes: ['user_Id', 'role'],
+            attributes: ['user_Id', 'role', 'verified'],
             raw: true
         });
 
@@ -31,6 +31,7 @@ const isStudent = async (req, res, next) => {
         req.user = {
             id: user.user_Id,
             role: user.role,
+            verified: user.verified
         };
 
         return next();
@@ -89,7 +90,7 @@ const isExpert = async (req, res, next) => {
         const decoded = jwt.verify(token, process.env.KEY);
 
         const user = await User.findByPk(decoded.id, {
-            attributes: ['user_Id', 'role'],
+            attributes: ['user_Id', 'role', 'verified'],
             raw: true
         });
 
@@ -98,6 +99,7 @@ const isExpert = async (req, res, next) => {
         req.user = {
             id: user.user_Id,
             role: user.role,
+            verified: user.verified
         };
 
         if (req.user.role === "expert" || req.user.role === "admin") {
@@ -121,11 +123,24 @@ const getUser = async (req, res, next) => {
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
-}
+};
+
+const isVerified = (req, res, next) => {
+    if (!req.user) {
+        return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    if (req.user.verified === 1) {
+        return next();
+    } else {
+        return res.status(403).json({ message: 'Access denied: Account not verified' });
+    }
+};
 
 module.exports = {
     isStudent,
     isAdmin,
     isExpert,
-    getUser
+    getUser,
+    isVerified
 };
