@@ -17,15 +17,7 @@ const create = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
-    try {
-        const cacheData = JSON.parse(fs.readFileSync(cache, 'utf-8'));
-        if (!cacheData.disciplineTeachers) {
-            return res.status(404).json({ message: 'disciplineTeacher not found in cache.' });
-        }
-        return res.status(200).json(cacheData.disciplineTeachers);
-    } catch (error) {
-        return res.status(500).json({ message: error.message });
-    }
+    getFromDb(req, res);
 };
 
 const getFromDb = async (req, res) => {
@@ -75,7 +67,7 @@ const update = async (req, res) => {
     try {
         const { disciplineTeacher_Id } = req.params;
         const { teacher_Id, discipline_Id, language_Id, beginning_Year } = req.body;
-        const disciplineTeacher = await DisciplineTeacher.update({ teacher_Id, discipline_Id, language_Id, beginning_Year }, {where: {disciplineTeacher_Id}});
+        const disciplineTeacher = await DisciplineTeacher.update({ teacher_Id, discipline_Id, language_Id, beginning_Year }, { where: { disciplineTeacher_Id } });
         return res.status(200).json(disciplineTeacher);
     } catch (error) {
         return res.status(500).json({ message: error.message });

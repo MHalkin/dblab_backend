@@ -5,7 +5,7 @@ const create = async (req, res) => {
     try {
         const { nickname, email, login, password, role, student_group } = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
-        const user = await User.create({ nickname, email, login, password:hashedPassword, role, student_group });
+        const user = await User.create({ nickname, email, login, password: hashedPassword, role, student_group });
         return res.status(201).json(user);
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -22,7 +22,6 @@ const getAll = async (req, res) => {
 };
 
 const getFromDb = async (req, res) => {
-    // Для таблиці юзерів логіка така ж, як getAll
     return getAll(req, res);
 };
 
@@ -39,16 +38,15 @@ const deleter = async (req, res) => {
 const update = async (req, res) => {
     try {
         const { user_Id } = req.params;
-        const { nickname, email, login, password, role, student_group } = req.body;
-        
-        const updateData = { nickname, email, login, role, student_group };
-        
-        // Хешуємо пароль тільки якщо він був переданий
+        const { nickname, email, login, password, role, student_group, verified } = req.body;
+
+        const updateData = { nickname, email, login, role, student_group, verified };
+
         if (password) {
             updateData.password = await bcrypt.hash(password, 10);
         }
-        
-        const user = await User.update(updateData, {where: {user_Id}});
+
+        const user = await User.update(updateData, { where: { user_Id } });
         return res.status(200).json(user);
     } catch (error) {
         return res.status(500).json({ message: error.message });

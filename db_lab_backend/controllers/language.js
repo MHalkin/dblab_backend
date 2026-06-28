@@ -14,15 +14,7 @@ const create = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
-    try {
-        const cacheData = JSON.parse(fs.readFileSync(cache, 'utf-8'));
-        if (!cacheData.languages) {
-            return res.status(404).json({ message: 'language not found in cache.' });
-        }
-        return res.status(200).json(cacheData.languages);
-    } catch (error) {
-        return res.status(500).json({ message: error.message });
-    }
+    getFromDb(req, res);
 };
 
 const getFromDb = async (req, res) => {
@@ -48,7 +40,7 @@ const update = async (req, res) => {
     try {
         const { language_Id } = req.params;
         const { language_name } = req.body;
-        const language = await Language.update({ language_name }, {where: {language_Id}});
+        const language = await Language.update({ language_name }, { where: { language_Id } });
         return res.status(200).json(language);
     } catch (error) {
         return res.status(500).json({ message: error.message });

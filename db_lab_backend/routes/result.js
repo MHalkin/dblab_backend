@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { create, studentCreate, getMyResults, getAll, getFromDb, deleter, update, updateStatus } = require('../controllers/result');
-const { isAdmin, isStudent } = require('../middlewares/auth');
+const { isAdmin, isVerified, isStudent } = require('../middlewares/auth');
 
-router.post('/student/create', isStudent, studentCreate);
+router.post('/student/create', isStudent, isVerified, studentCreate);
 router.post('/create', isAdmin, create);
 router.get('/work/:work_Id', isStudent, getMyResults);
 router.get('/getFromDb', isAdmin, getFromDb);

@@ -12,15 +12,26 @@ const Proposal = db.sequelize.define('Proposal', {
         allowNull: true
     },
     description: {
-        type: DataTypes.STRING(500),
+        type: DataTypes.STRING(2000),
         allowNull: true
     },
     status: {
-        type: DataTypes.STRING(100),
-        allowNull: true
+        type: DataTypes.ENUM(
+            'Запропоновано',
+            'Підтверджено',
+            'Відкладено',
+            'Завершено',
+            'Є записи'
+        ),
+        allowNull: true,
+        defaultValue: 'Запропоновано'
     },
     complexity: {
-        type: DataTypes.STRING(100),
+        type: DataTypes.ENUM(
+            'Низька',
+            'Середня',
+            'Висока'
+        ),
         allowNull: true
     },
     teacher_Id: {
