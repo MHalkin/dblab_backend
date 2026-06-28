@@ -3,10 +3,34 @@ const fs = require('fs');
 const cache = path.join(__dirname, '..', 'cache.json');
 const { Result, Work } = require('../models/Relations');
 
+const toNullableInt = (value) => {
+    if (value === '' || value === undefined || value === null) return null;
+    const parsed = parseInt(value, 10);
+    return Number.isNaN(parsed) ? null : parsed;
+};
+
+const buildResultPayload = (body, { forCreate = false, extra = {} } = {}) => {
+    const payload = {};
+    const stringFields = ['name', 'full_name'];
+    const intFields = ['year', 'pages', 'work_Id', 'result_type_Id', 'magazine_Id', 'conference_Id', 'competition_Id'];
+
+    for (const field of stringFields) {
+        if (forCreate || field in body) payload[field] = body[field];
+    }
+    for (const field of intFields) {
+        if (forCreate || field in body) payload[field] = toNullableInt(body[field]);
+    }
+    if (body.status) payload.status = body.status;
+    if (forCreate || 'moderation_comment' in body) {
+        payload.moderation_comment = body.moderation_comment || null;
+    }
+
+    return { ...payload, ...extra };
+};
+
 const create = async (req, res) => {
     try {
-        const { name, year, pages, full_name, work_Id, result_type_Id, magazine_Id, conference_Id, competition_Id } = req.body;
-        const result = await Result.create({ name, year, pages, full_name, work_Id, result_type_Id, magazine_Id, conference_Id, competition_Id });
+        const result = await Result.create(buildResultPayload(req.body, { forCreate: true }));
         return res.status(201).json(result);
     } catch (error) {
         return res.status(500).json({ message: error.message });
@@ -15,20 +39,7 @@ const create = async (req, res) => {
 
 const studentCreate = async (req, res) => {
     try {
-        const { name, year, pages, full_name, work_Id, result_type_Id, magazine_Id, conference_Id, competition_Id } = req.body;
-
-        const result = await Result.create({
-            name,
-            year,
-            pages,
-            full_name,
-            work_Id,
-            result_type_Id,
-            magazine_Id,
-            conference_Id,
-            competition_Id,
-            status: 'В обробці' // Дефолтний статус
-        });
+        const result = await Result.create(buildResultPayload(req.body, { forCreate: true, extra: { status: 'В обробці' } }));
 
         return res.status(201).json(result);
     } catch (error) {
@@ -154,13 +165,7 @@ const deleter = async (req, res) => {
 const update = async (req, res) => {
     try {
         const { result_Id } = req.params;
-        const { status, moderation_comment, name, year, pages, full_name, work_Id, result_type_Id, magazine_Id, conference_Id, competition_Id } = req.body;
-        
-        const updateData = { 
-            status,
-            moderation_comment,
-            name, year, pages, full_name, work_Id, result_type_Id, magazine_Id, conference_Id, competition_Id 
-        };
+        const updateData = buildResultPayload(req.body);
 
         Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
 
