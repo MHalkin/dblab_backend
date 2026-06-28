@@ -171,9 +171,9 @@ const getAcademicYear = (year) => {
 const formatDate = (date, format = 'full') => {
     if (!date) return '';
     const d = new Date(date);
-    const months = ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня', 
-                    'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня'];
-    
+    const months = ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
+        'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня'];
+
     if (format === 'full') {
         return `« ${d.getDate()} »   _${months[d.getMonth()]}_  ${d.getFullYear()}   р.`;
     }
@@ -182,8 +182,8 @@ const formatDate = (date, format = 'full') => {
 
 const getCurrentDate = () => {
     const now = new Date();
-    const months = ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня', 
-                    'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня'];
+    const months = ['січня', 'лютого', 'березня', 'квітня', 'травня', 'червня',
+        'липня', 'серпня', 'вересня', 'жовтня', 'листопада', 'грудня'];
     return `«_${now.getDate()}_»___${months[now.getMonth()]}___${now.getFullYear()}  р.`;
 };
 
@@ -193,11 +193,11 @@ const generatePlan = async (req, res) => {
         const { academicYear } = req.query;
         const year = getAcademicYear(academicYear);
 
-        const students = await User.findAll({ 
+        const students = await User.findAll({
             where: { role: 'student' },
             order: [['nickname', 'ASC']]
         });
-        
+
         const teachers = await Teacher.findAll({
             where: { teacher_role: 'Керівник' },
             order: [['full_name', 'ASC']]
@@ -234,7 +234,7 @@ const generatePlan = async (req, res) => {
         students.forEach((s, index) => {
             const studentName = s.nickname || s.login || 'Н/Д';
             const studentGroup = s.student_group || '';
-            
+
             studentTableRows.push(new TableRow({
                 children: [
                     new TableCell({
@@ -295,17 +295,17 @@ const generatePlan = async (req, res) => {
                         spacing: { after: 200 },
                         children: [new TextRun({ text: formatDate(new Date()) })]
                     }),
-                    
+
                     createEmptyLine(),
 
                     createCenteredParagraph('ПЛАН РОБОТИ СТУДЕНТСЬКОГО НАУКОВОГО ГУРТКА', { bold: true, size: 28 }),
                     createCenteredParagraph('«Лабораторія розробки баз даних DBLAB»', { bold: true, size: 26 }),
                     createCenteredParagraph(`на   ${year} навчальний рік`, { size: 24 }),
-                    
+
                     createEmptyLine(),
-                    
+
                     createLeftParagraph(`План обговорено на засіданні кафедри, протокол №___ від «__» ________ 20__ р.`),
-                    
+
                     createEmptyLine(),
 
                     createLeftParagraph('Склав: '),
@@ -313,17 +313,17 @@ const generatePlan = async (req, res) => {
                     ...(teachers.length > 0 ? [createLeftParagraph('(підпис, прізвище, ініціали)', { size: 20, italics: true })] : []),
                     teachers.length === 0 ? createLeftParagraph('____________', { after: 50 }) : createEmptyLine(),
                     createLeftParagraph(getCurrentDate()),
-                    
+
                     createEmptyLine(),
 
                     createSectionHeading('1.', 'Керівники наукового гуртка:'),
-                    ...teachers.length > 0 
+                    ...teachers.length > 0
                         ? teachers.map(t => {
                             const info = [t.level, t.position, `кафедри ПІ`, t.full_name].filter(Boolean).join(', ');
                             return createBulletParagraph(info);
                         })
                         : [createEmptyLine()],
-                    
+
                     createEmptyLine(),
 
                     createSectionHeading('2.', 'Члени наукового гуртка:'),
@@ -331,12 +331,12 @@ const generatePlan = async (req, res) => {
                         width: { size: 100, type: WidthType.PERCENTAGE },
                         rows: studentTableRows,
                     }),
-                    
+
                     createEmptyLine(),
 
                     createSectionHeading('3.', 'Мета діяльності гуртка'),
                     createLeftParagraph(STATIC_GOAL, { indent: true }),
-                    
+
                     createEmptyLine(),
 
                     createSectionHeading('4.', 'Основні завдання діяльності гуртка'),
@@ -347,14 +347,14 @@ const generatePlan = async (req, res) => {
                             new TextRun({ text: task, size: 24 })
                         ]
                     })),
-                    
+
                     createEmptyLine(),
 
                     createSectionHeading('5.', 'Очікувані результати діяльності гуртка'),
 
                     createSubSectionHeading('5.1', 'Участі у міжнародних та національних наукових конференціях.'),
                     createLeftParagraph(`На ${year} н.р. планується участь з результатами студентських наукових досліджень в:`),
-                    ...conferences.length > 0 
+                    ...conferences.length > 0
                         ? conferences.map(c => new Paragraph({
                             spacing: { after: 50 },
                             children: [
@@ -363,15 +363,15 @@ const generatePlan = async (req, res) => {
                             ]
                         }))
                         : [createEmptyLine()],
-                    
+
                     createEmptyLine(),
 
                     createSubSectionHeading('5.2', 'Участь у конкурсах наукових робіт.'),
-                    createEmptyLine(), 
+                    createEmptyLine(),
 
                     createSubSectionHeading('5.3', 'Участь у конкурсах прикладних застосунків.'),
                     createLeftParagraph(`На ${year} н.р. планується участь студентських наукових розробок та прикладних застосунків в:`),
-                    ...competitions.length > 0 
+                    ...competitions.length > 0
                         ? competitions.map(c => new Paragraph({
                             spacing: { after: 50 },
                             children: [
@@ -380,7 +380,7 @@ const generatePlan = async (req, res) => {
                             ]
                         }))
                         : [createEmptyLine()],
-                    
+
                     createEmptyLine(),
 
                     createSubSectionHeading('5.4', 'Створення середовища для міждисциплінарної співпраці.'),
@@ -389,14 +389,16 @@ const generatePlan = async (req, res) => {
             }],
         });
 
-        const buffer = await Packer.toBuffer(doc);
         res.setHeader('Content-Disposition', `attachment; filename=Plan_DBLAB_${year.replace(/\s*\/\s*/, '-')}.docx`);
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        res.send(buffer);
+
+        Packer.toStream(doc).pipe(res);
 
     } catch (error) {
         console.error('Error generating plan:', error);
-        res.status(500).json({ message: "Error generating plan", error: error.message });
+        if (!res.headersSent) {
+            res.status(500).json({ message: "Error generating plan", error: error.message });
+        }
     }
 };
 
@@ -410,14 +412,14 @@ const generateReport = async (req, res) => {
         const startYear = yearParts.length > 0 ? yearParts[0] : null;
         const endYear = yearParts.length > 1 ? yearParts[1] : yearParts[0];
 
-        const yearCondition = startYear && endYear 
+        const yearCondition = startYear && endYear
             ? { year: { [Op.between]: [startYear, endYear] } }
-            : startYear 
+            : startYear
                 ? { year: startYear }
                 : {};
 
         const results = await Result.findAll({
-            where: { 
+            where: {
                 status: 'Підтверджено',
                 ...yearCondition
             },
@@ -426,8 +428,8 @@ const generateReport = async (req, res) => {
                 { model: Conference, attributes: ['name', 'conference_Id', 'approximate_date', 'city', 'host'] },
                 { model: Competition, attributes: ['name', 'competition_Id', 'approximate_date'] },
                 { model: Magazine, attributes: ['name', 'magazine_Id', 'publisher', 'city'] },
-                { 
-                    model: Work, 
+                {
+                    model: Work,
                     attributes: ['name', 'work_Id'],
                     include: [{ model: Proposal, attributes: ['name'] }]
                 }
@@ -522,7 +524,7 @@ const generateReport = async (req, res) => {
             const typeName = r.ResultType?.name?.toLowerCase() || '';
             return typeName.includes('тези') || typeName.includes('доповід') || typeName.includes('конференц');
         });
-        
+
         if (otherConferenceResults.length > 0) {
             documentChildren.push(
                 createLeftParagraph('Інші конференції:', { bold: true, before: 100 })
@@ -655,14 +657,16 @@ const generateReport = async (req, res) => {
             }],
         });
 
-        const buffer = await Packer.toBuffer(doc);
         res.setHeader('Content-Disposition', `attachment; filename=Report_DBLAB_${year.replace(/\s*\/\s*/, '-')}.docx`);
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-        res.send(buffer);
+
+        Packer.toStream(doc).pipe(res);
 
     } catch (error) {
         console.error('Error generating report:', error);
-        res.status(500).json({ message: "Error generating report", error: error.message });
+        if (!res.headersSent) {
+            res.status(500).json({ message: "Error generating report", error: error.message });
+        }
     }
 };
 

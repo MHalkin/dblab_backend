@@ -21,7 +21,12 @@ const skillChapterRoutes = require('./routes/skillChapter.js');
 const teacherRoutes = require('./routes/teacher.js');
 const userRoutes = require('./routes/user.js');
 const authRoutes = require('./routes/auth.js');
-const cacheRoutes = require('./routes/cache.js');
+const resourceRoutes = require('./routes/resource.js');
+const interactionUserResourceRoutes = require('./routes/interaction_user_resource.js')
+const commentRoutes = require('./routes/comment.js')
+const linkTypeRoutes = require('./routes/linkType.js');
+const stackRoutes = require('./routes/stack.js');
+const interactionUserStackRoutes = require('./routes/interaction_user_stack.js');
 
 const directionRoutes = require('./routes/direction.js');
 const proposalTypeRoutes = require('./routes/proposalType.js');
@@ -34,6 +39,16 @@ const competitionRoutes = require('./routes/competition.js');
 const resultRoutes = require('./routes/result.js');
 const statisticsRoutes = require('./routes/statistics.js');
 const reportRoutes = require('./routes/report.js');
+
+const projectRoutes = require('./routes/project.js');
+const modelRoutes = require('./routes/dataModel.js');
+const expertiseRoutes = require('./routes/expertise.js');
+const imbedRoutes = require('./routes/imbed.js');
+const projectCommentRoutes = require('./routes/projectComment.js');
+const expertRequestRoutes = require('./routes/expertRequest.js');
+
+const storageRoutes = require('./routes/storage.js');
+
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -53,7 +68,12 @@ app.use('/skillChapter', skillChapterRoutes);
 app.use('/teacher', teacherRoutes);
 app.use('/user', userRoutes);
 app.use('/auth', authRoutes);
-app.use('/cache', cacheRoutes);
+app.use('/resource', resourceRoutes);
+app.use('/interactionUserResource', interactionUserResourceRoutes);
+app.use('/comment', commentRoutes);
+app.use('/linkType', linkTypeRoutes);
+app.use('/stack', stackRoutes);
+app.use("/interactionUserStack", interactionUserStackRoutes);
 
 app.use('/direction', directionRoutes);
 app.use('/proposalType', proposalTypeRoutes);
@@ -66,6 +86,15 @@ app.use('/competition', competitionRoutes);
 app.use('/result', resultRoutes);
 app.use('/statistics', statisticsRoutes);
 app.use('/report', reportRoutes);
+
+app.use('/project', projectRoutes);
+app.use('/model', modelRoutes);
+app.use('/expertise', expertiseRoutes);
+app.use('/imbed', imbedRoutes);
+app.use('/projectComment', projectCommentRoutes);
+app.use('/expertRequest', expertRequestRoutes);
+
+app.use('/storage', storageRoutes);
 
 db.sequelize.sync()
     .then(() => {

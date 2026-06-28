@@ -1,6 +1,3 @@
-const path = require('path');
-const fs = require('fs');
-const cache = path.join(__dirname, '..', 'cache.json');
 const Event = require('../models/Relations').Event;
 const Teacher = require('../models/Relations').Teacher;
 const Lesson = require('../models/Relations').Lesson;
@@ -21,15 +18,19 @@ const create = async (req, res) => {
 
 const getAll = async (req, res) => {
     try {
-        const cacheData = JSON.parse(fs.readFileSync(cache, 'utf-8'));
-        if (!cacheData.events) {
-            return res.status(404).json({ message: 'event not found in cache.' });
+        const events = await Event.findAll();
+
+        if (!events || events.length === 0) {
+            return res.status(404).json({ message: 'event not found.' });
         }
-        const formattedEvents = cacheData.events.map(event => ({
-            ...event,
-            begin_date: formatTime(event.begin_date)
+
+        const formattedEvents = events.map(event => ({
+            ...event.toJSON(),
+            begin_date: event.begin_date ? event.begin_date.slice(0, 5) : null
         }));
+
         return res.status(200).json(formattedEvents);
+
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
@@ -94,7 +95,7 @@ const update = async (req, res) => {
     try {
         const { event_Id } = req.params;
         const { teacher_Id, lesson_Id, event_name, type, format, begin_date, status } = req.body;
-        const event = await Event.update({ teacher_Id, lesson_Id, event_name, type, format, begin_date, status }, {where: {event_Id}});
+        const event = await Event.update({ teacher_Id, lesson_Id, event_name, type, format, begin_date, status }, { where: { event_Id } });
         return res.status(200).json(event);
     } catch (error) {
         return res.status(500).json({ message: error.message });

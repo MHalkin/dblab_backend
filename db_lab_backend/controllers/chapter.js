@@ -1,10 +1,7 @@
-const path = require('path');
 const Chapter = require('../models/Relations').Chapter;
 const Skill = require('../models/Relations').Skill;
 const Level = require('../models/Relations').Level;
-const fs = require('fs');
 const DevelopmentDirection = require('../models/DevelopmentDirection');
-const cache = path.join(__dirname, '..', 'cache.json');
 
 const create = async (req, res) => {
     try {
@@ -18,11 +15,13 @@ const create = async (req, res) => {
 
 const getAll = async (req, res) => {
     try {
-        const cacheData = JSON.parse(fs.readFileSync(cache, 'utf-8'));
-        if (!cacheData.chapters) {
-            return res.status(404).json({ message: 'Chapters not found in cache.' });
+        const chapters = await Chapter.findAll();
+
+        if (!chapters || chapters.length === 0) {
+            return res.status(404).json({ message: 'Chapters not found.' });
         }
-        return res.status(200).json(cacheData.chapters);
+
+        return res.status(200).json(chapters);
     } catch (error) {
         return res.status(500).json({ message: error.message });
     }
@@ -85,7 +84,7 @@ const update = async (req, res) => {
     try {
         const { chapter_Id } = req.params;
         const { level_Id, development_direction_Id, chapter_name } = req.body;
-        const chapter = await Chapter.update({ level_Id, development_direction_Id, chapter_name }, {where: {chapter_Id}});
+        const chapter = await Chapter.update({ level_Id, development_direction_Id, chapter_name }, { where: { chapter_Id } });
         return res.status(200).json(chapter);
     } catch (error) {
         return res.status(500).json({ message: error.message });

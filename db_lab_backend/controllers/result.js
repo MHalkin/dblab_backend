@@ -1,6 +1,3 @@
-const path = require('path');
-const fs = require('fs');
-const cache = path.join(__dirname, '..', 'cache.json');
 const { Result, Work } = require('../models/Relations');
 
 const toNullableInt = (value) => {
@@ -67,6 +64,8 @@ const getMyResults = async (req, res) => {
         const { work_Id } = req.params;
         const authUserId = req.user.id;
 
+        const authUserId = req.user.id;
+
         const results = await Result.findAll({
             where: { work_Id },
             include: [{
@@ -74,7 +73,14 @@ const getMyResults = async (req, res) => {
                 where: { user_Id: authUserId },
                 attributes: []
             }]
+            where: { work_Id },
+            include: [{
+                model: Work,
+                where: { user_Id: authUserId },
+                attributes: []
+            }]
         });
+
 
         return res.status(200).json(results);
     } catch (error) {
@@ -99,28 +105,7 @@ const updateStatus = async (req, res) => {
 };
 
 const getAll = async (req, res) => {
-    try {
-        let cacheData = {};
-        if (fs.existsSync(cache)) {
-            try {
-                const fileContent = fs.readFileSync(cache, 'utf-8');
-                if (fileContent) cacheData = JSON.parse(fileContent);
-            } catch (err) { console.error(err); }
-        }
-
-        if (cacheData.results && cacheData.results.length > 0) {
-            return res.status(200).json(cacheData.results);
-        }
-
-        const results = await Result.findAll({});
-        
-        cacheData.results = results;
-        fs.writeFileSync(cache, JSON.stringify(cacheData, null, 2));
-
-        return res.status(200).json(results);
-    } catch (error) {
-        return res.status(500).json({ message: error.message });
-    }
+    getFromDb(req, res);
 };
 
 const getFromDb = async (req, res) => {
