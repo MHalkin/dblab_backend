@@ -33,16 +33,31 @@ const create = async (req, res) => {
         const result = await Result.create(buildResultPayload(req.body, { forCreate: true }));
         return res.status(201).json(result);
     } catch (error) {
+        console.error('Error in create result:', error);
         return res.status(500).json({ message: error.message });
     }
 };
 
 const studentCreate = async (req, res) => {
     try {
-        const result = await Result.create(buildResultPayload(req.body, { forCreate: true, extra: { status: 'В обробці' } }));
+        const work_Id = toNullableInt(req.body.work_Id);
+        const authUserId = req.user.id;
+
+        const work = await Work.findOne({
+            where: { work_Id, user_Id: authUserId }
+        });
+
+        if (!work) {
+            return res.status(403).json({ message: "Ви не маєте прав додавати результати до цієї роботи." });
+        }
+
+        const result = await Result.create(
+            buildResultPayload(req.body, { forCreate: true, extra: { status: 'В обробці' } })
+        );
 
         return res.status(201).json(result);
     } catch (error) {
+        console.error('Error in studentCreate result:', error);
         return res.status(500).json({ message: error.message });
     }
 };
@@ -50,9 +65,17 @@ const studentCreate = async (req, res) => {
 const getMyResults = async (req, res) => {
     try {
         const { work_Id } = req.params;
+        const authUserId = req.user.id;
+
         const results = await Result.findAll({
-            where: { work_Id }
+            where: { work_Id },
+            include: [{
+                model: Work,
+                where: { user_Id: authUserId },
+                attributes: []
+            }]
         });
+
         return res.status(200).json(results);
     } catch (error) {
         return res.status(500).json({ message: error.message });
