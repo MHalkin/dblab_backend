@@ -1,18 +1,43 @@
 const { Result, Work } = require('../models/Relations');
 
+const toNullableInt = (value) => {
+    if (value === '' || value === undefined || value === null) return null;
+    const parsed = parseInt(value, 10);
+    return Number.isNaN(parsed) ? null : parsed;
+};
+
+const buildResultPayload = (body, { forCreate = false, extra = {} } = {}) => {
+    const payload = {};
+    const stringFields = ['name', 'full_name'];
+    const intFields = ['year', 'pages', 'work_Id', 'result_type_Id', 'magazine_Id', 'conference_Id', 'competition_Id'];
+
+    for (const field of stringFields) {
+        if (forCreate || field in body) payload[field] = body[field];
+    }
+    for (const field of intFields) {
+        if (forCreate || field in body) payload[field] = toNullableInt(body[field]);
+    }
+    if (body.status) payload.status = body.status;
+    if (forCreate || 'moderation_comment' in body) {
+        payload.moderation_comment = body.moderation_comment || null;
+    }
+
+    return { ...payload, ...extra };
+};
+
 const create = async (req, res) => {
     try {
-        const { name, year, pages, full_name, work_Id, result_type_Id, magazine_Id, conference_Id, competition_Id } = req.body;
-        const result = await Result.create({ name, year, pages, full_name, work_Id, result_type_Id, magazine_Id, conference_Id, competition_Id });
+        const result = await Result.create(buildResultPayload(req.body, { forCreate: true }));
         return res.status(201).json(result);
     } catch (error) {
+        console.error('Error in create result:', error);
         return res.status(500).json({ message: error.message });
     }
 };
 
 const studentCreate = async (req, res) => {
     try {
-        const { name, year, pages, full_name, work_Id, result_type_Id, magazine_Id, conference_Id, competition_Id } = req.body;
+        const work_Id = toNullableInt(req.body.work_Id);
         const authUserId = req.user.id;
 
         const work = await Work.findOne({
@@ -23,15 +48,13 @@ const studentCreate = async (req, res) => {
             return res.status(403).json({ message: "Ви не маєте прав додавати результати до цієї роботи." });
         }
 
-        const result = await Result.create({
-            name, year, pages, full_name,
-            work_Id,
-            result_type_Id, magazine_Id, conference_Id, competition_Id,
-            status: 'В обробці'
-        });
+        const result = await Result.create(
+            buildResultPayload(req.body, { forCreate: true, extra: { status: 'В обробці' } })
+        );
 
         return res.status(201).json(result);
     } catch (error) {
+        console.error('Error in studentCreate result:', error);
         return res.status(500).json({ message: error.message });
     }
 };
@@ -41,6 +64,8 @@ const getMyResults = async (req, res) => {
         const { work_Id } = req.params;
         const authUserId = req.user.id;
 
+        const authUserId = req.user.id;
+
         const results = await Result.findAll({
             where: { work_Id },
             include: [{
@@ -48,7 +73,14 @@ const getMyResults = async (req, res) => {
                 where: { user_Id: authUserId },
                 attributes: []
             }]
+            where: { work_Id },
+            include: [{
+                model: Work,
+                where: { user_Id: authUserId },
+                attributes: []
+            }]
         });
+
 
         return res.status(200).json(results);
     } catch (error) {
@@ -141,13 +173,7 @@ const deleter = async (req, res) => {
 const update = async (req, res) => {
     try {
         const { result_Id } = req.params;
-        const { status, moderation_comment, name, year, pages, full_name, work_Id, result_type_Id, magazine_Id, conference_Id, competition_Id } = req.body;
-
-        const updateData = {
-            status,
-            moderation_comment,
-            name, year, pages, full_name, work_Id, result_type_Id, magazine_Id, conference_Id, competition_Id
-        };
+        const updateData = buildResultPayload(req.body);
 
         Object.keys(updateData).forEach(key => updateData[key] === undefined && delete updateData[key]);
 
